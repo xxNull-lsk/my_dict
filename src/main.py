@@ -1,20 +1,24 @@
 #!/bin/python3
 import sys
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 
-from src.MainWindow import MainWindow
+from src.main_window import MainWindow
+from setting import setting
 
 
 def main():
     # os.environ['QT_DEBUG_PLUGINS'] = '1'
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    app.setApplicationName("我的词典")
+    import qdarkstyle
+    dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
+    app.setStyleSheet(dark_stylesheet)
+    app.setApplicationName("MyDict")
     app.setQuitOnLastWindowClosed(False)
     main_window = MainWindow()
-    main_window.show()
+    if setting.show_main_window_when_startup:
+        main_window.show()
     sys.exit(app.exec_())
 
 

@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QMessageBox
 
-from src.util import resource_path
+from src.util import resource_path, get_version
 
 
 class TrayIcon(QSystemTrayIcon):
@@ -17,6 +17,7 @@ class TrayIcon(QSystemTrayIcon):
         self.setContextMenu(self.menu)
         ico_dict = QIcon(QPixmap(resource_path("./res/dict.png")))
         self.setIcon(ico_dict)
+        self.activated.connect(self.on_activated)
 
     def on_quit(self):
         self.setVisible(False)
@@ -24,7 +25,10 @@ class TrayIcon(QSystemTrayIcon):
 
     @staticmethod
     def on_about():
-        QMessageBox.about(None, "关于", "我的字典")
+        QMessageBox.about(None, "关于", "我的字典 {}\nhttps://github.com/xxNull-lsk/my_dict".format(get_version()))
 
     def on_show(self):
+        self.parent().show()
+
+    def on_activated(self):
         self.parent().show()
