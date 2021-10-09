@@ -1,7 +1,3 @@
-import random
-import time
-from hashlib import md5
-
 import requests
 
 
