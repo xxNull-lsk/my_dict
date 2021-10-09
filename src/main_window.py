@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget
+from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget, QMainWindow
 
 from src.setting import setting
 from src.UI.find_text import FindText
@@ -8,7 +8,7 @@ from src.UI.clipboard import TipWindow
 from src.UI.setting import SettingWindow
 from src.tray_icon import TrayIcon
 from src.util import load_icon, get_version
-from src.youdao import YouDaoFanYi
+from src.backend.youdao import YouDaoFanYi
 
 
 class MainWindow(QWidget):
@@ -16,7 +16,7 @@ class MainWindow(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setFixedSize(QSize(640, 480))
+        self.setGeometry(QRect(0, 0, 640, 480))
         self.tray = TrayIcon(self)
         self.tray.show()
 

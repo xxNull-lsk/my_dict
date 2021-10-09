@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QTextEdit, QVBoxLayout, QHBoxL
 
 from src.UI.result import ResultWindow
 from src.util import load_icon
-from src.youdao import YouDaoFanYi
+from src.backend.youdao import YouDaoFanYi
 
 
 class FindText(QWidget):

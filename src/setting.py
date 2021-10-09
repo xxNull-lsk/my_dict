@@ -5,6 +5,7 @@ setting_filename = "{}/setting.json".format(setting_folder)
 
 
 class Setting:
+    star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
     show_main_window_when_startup = True
 
@@ -14,6 +15,8 @@ class Setting:
     def load(self):
         if not os.path.exists(setting_folder):
             os.makedirs(setting_folder)
+        if not os.path.exists(self.star_dict_folder):
+            os.makedirs(self.star_dict_folder)
         txt = ""
         if os.path.exists(setting_filename):
             with open(setting_filename, 'r') as f:

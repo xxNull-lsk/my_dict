@@ -6,7 +6,7 @@ from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QWidget
 
 from src.UI.result import ResultWindow
-from src.youdao import YouDaoFanYi
+from src.backend.youdao import YouDaoFanYi
 
 
 class TipWindow(QWidget):

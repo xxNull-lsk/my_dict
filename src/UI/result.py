@@ -5,7 +5,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QWidget, QLabel, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox
 
 from src.util import load_icon
-from src.youdao import YouDaoFanYi
+from src.backend.youdao import YouDaoFanYi
 
 
 class ResultWindow(QWidget):
@@ -90,9 +90,9 @@ class ResultWindow(QWidget):
         res = ''
         for item in result["basic"]:
             if res != '':
-                res += "\n"
-            res += "    {}".format(item)
-
+                res += "<br>"
+            res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(self.plan2html(item))
+        res = "<h5>有道词典</h5><hr/>" + res
         if 'ukspeach' in result and result['ukspeach'] != '':
             self.media_player_uk.setMedia(
                 QMediaContent(QUrl(YouDaoFanYi.voice_addr(result['ukspeach'])))
@@ -115,5 +115,23 @@ class ResultWindow(QWidget):
             self.btn_us.hide()
             self.label_ussm.hide()
         self.edit_res.clear()
-        self.edit_res.setText(res)
+        self.edit_res.setHtml(res)
         return True
+
+    @staticmethod
+    def plan2html(v: str):
+        if "<br>" not in v and '<br/>' not in v:
+            v = v.replace('\n', '<br>')
+            v = v.replace(' ', '&nbsp;')
+            v = v.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+        return v
+
+    def add_word_result(self, k, v: str):
+        html = self.edit_res.toHtml()
+        if "<br>" not in v and '<br/>' not in v:
+            v = v.replace('\n', '<br>')
+            v = v.replace(' ', '&nbsp;')
+            v = v.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+        self.edit_res.setHtml("{}"
+                              "<h5>{}</h5><hr/>"
+                              "&nbsp;&nbsp;&nbsp;&nbsp;<div>{}</div>".format(html, k, v))

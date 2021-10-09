@@ -1,14 +1,17 @@
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
 
+from src.setting import setting
 from src.UI.result import ResultWindow
+from src.backend.stardict import StartDict
 from src.util import load_icon
-from src.youdao import YouDaoFanYi
+from src.backend.youdao import YouDaoFanYi
 
 
 class FindWord(QWidget):
     def __init__(self, youdao: YouDaoFanYi, parent=None):
         super().__init__(parent)
 
+        self.star_dict = StartDict(setting.star_dict_folder, True)
         self.youdao = youdao
         self.edit_word = QLineEdit()
         self.edit_word.setPlaceholderText("搜索单词")
@@ -34,5 +37,11 @@ class FindWord(QWidget):
     def on_find(self):
         if self.edit_word.text() == '':
             return
-        result = self.youdao.translate_word(self.edit_word.text())
+        word = self.edit_word.text().strip()
+        result = self.youdao.translate_word(word)
         self.result.show_word_result(result)
+        res = self.star_dict.translate_word(word)
+        for k in res.keys():
+            if res[k] == '':
+                continue
+            self.result.add_word_result(k, res[k])
