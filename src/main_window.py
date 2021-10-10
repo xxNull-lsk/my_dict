@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QSize, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget, QMainWindow
 
+from src.backend.stardict import StartDict
 from src.setting import setting
 from src.UI.find_text import FindText
 from src.UI.find_word import FindWord
@@ -24,14 +25,15 @@ class MainWindow(QWidget):
         self.setWindowTitle("我的词典 {}".format(get_version()))
 
         self.youdao = YouDaoFanYi()
+        self.star_dict = StartDict(setting.star_dict_folder, True)
         if setting.support_clipboard:
-            self.tip_window = TipWindow(self.youdao)
+            self.tip_window = TipWindow(self.youdao, self.star_dict)
             self.tip_window.hide()
 
         self.tab = QTabWidget()
-        self.tab.addTab(FindWord(self.youdao, self), '词典')
+        self.tab.addTab(FindWord(self.youdao, self.star_dict, self), '词典')
         self.tab.addTab(FindText(self.youdao, self), '翻译')
-        self.tab.addTab(SettingWindow(self), '设置')
+        self.tab.addTab(SettingWindow(self, self.star_dict), '设置')
         self.tab.tabBar().setMinimumWidth(200)
         self.tab.tabBar().setTabIcon(0, load_icon("word"))
         self.tab.tabBar().setTabIcon(1, load_icon("text"))

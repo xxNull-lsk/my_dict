@@ -6,14 +6,17 @@ from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QWidget
 
 from src.UI.result import ResultWindow
+from src.backend.stardict import StartDict
 from src.backend.youdao import YouDaoFanYi
+from src.setting import setting
 
 
 class TipWindow(QWidget):
     last_text = ""
 
-    def __init__(self, youdao: YouDaoFanYi):
+    def __init__(self, youdao: YouDaoFanYi, star_dict: StartDict):
         super().__init__()
+        self.star_dict = star_dict
         self.setMinimumSize(QSize(360, 280))
         self.clipboard = QApplication.clipboard()
         self.clipboard.dataChanged.connect(self.on_data_changed)
@@ -51,7 +54,6 @@ class TipWindow(QWidget):
             return
         self.last_text = ""
         is_word, result = self.youdao.translate(data)
-        print(json.dumps(result, indent=4, ensure_ascii=False))
         if is_word:
             succeed = self.result.show_word_result(result)
             self.label_src.setText(data)
@@ -59,6 +61,17 @@ class TipWindow(QWidget):
         else:
             succeed = self.result.show_text_result(result)
             self.label_src.hide()
+        res = self.star_dict.translate_word(data)
+        for k in res.keys():
+            if res[k] == '':
+                continue
+            count = len(setting.dicts_for_clipboard)
+            if count < 1:
+                continue
+            if k in setting.dicts_for_clipboard\
+                    or (count == 1 and setting.dicts_for_clipboard[0] == "*"):
+                self.result.add_word_result(k, res[k])
+                succeed = True
         if succeed:
             self.show()
 

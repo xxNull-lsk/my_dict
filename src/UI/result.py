@@ -10,6 +10,12 @@ from src.backend.youdao import YouDaoFanYi
 
 class ResultWindow(QWidget):
     last_text = ""
+    css = '<style type="text/css">\n' \
+          'div.title {\n' \
+          ' color: rgb(120, 120, 120);\n' \
+          ' font-size: 12px;\n' \
+          '}\n' \
+          '</style>'
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -92,7 +98,7 @@ class ResultWindow(QWidget):
             if res != '':
                 res += "<br>"
             res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(self.plan2html(item))
-        res = "<h5>有道词典</h5><hr/>" + res
+        res = self.css + "<div class=\"title\">有道词典</div><p>" + res + "</p>"
         if 'ukspeach' in result and result['ukspeach'] != '':
             self.media_player_uk.setMedia(
                 QMediaContent(QUrl(YouDaoFanYi.voice_addr(result['ukspeach'])))
@@ -128,10 +134,12 @@ class ResultWindow(QWidget):
 
     def add_word_result(self, k, v: str):
         html = self.edit_res.toHtml()
+        if self.css not in html:
+            html += self.css
         if "<br>" not in v and '<br/>' not in v:
             v = v.replace('\n', '<br>')
             v = v.replace(' ', '&nbsp;')
             v = v.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
         self.edit_res.setHtml("{}"
-                              "<h5>{}</h5><hr/>"
-                              "&nbsp;&nbsp;&nbsp;&nbsp;<div>{}</div>".format(html, k, v))
+                              "<div class=\"title\">{}</div>"
+                              "<p>{}</p>".format(html, k, v))

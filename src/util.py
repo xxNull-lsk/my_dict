@@ -4,12 +4,13 @@ import sys
 from PyQt5.QtGui import QIcon, QPixmap
 
 version = {
-    "curr": "0.0.1",
+    "curr": "0.1.1",
     "history": {
         "0.0.1": "实现基本功能:\n"
                  "  1、查词界面\n"
                  "  2、翻译界面\n"
                  "  3、剪贴板",
+        "0.1.1": "支持本地词典"
     }
 }
 

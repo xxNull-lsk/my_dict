@@ -1,13 +1,27 @@
 import json
 import os
+
+from PyQt5.QtCore import pyqtSignal, QObject
+
 setting_folder = "{}/.config/my_dict".format(os.environ["HOME"])
 setting_filename = "{}/setting.json".format(setting_folder)
 
 
+class SettingSignal(QObject):
+    signal_setting_changed = pyqtSignal()
+
+    def emit(self):
+        self.signal_setting_changed.emit()
+
+
 class Setting:
+    signal_setting = SettingSignal()
     star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
     show_main_window_when_startup = True
+    use_dark_skin = True
+    dicts_for_query = ["*"]
+    dicts_for_clipboard = []
 
     def __init__(self):
         self.load()
@@ -33,7 +47,7 @@ class Setting:
     def dump(self):
         obj = {}
         for i in self.__dir__():
-            if i.startswith("__"):
+            if i.startswith("__") or i.startswith("signal_"):
                 continue
             attr = self.__getattribute__(i)
             if callable(attr):
@@ -45,7 +59,9 @@ class Setting:
         if not os.path.exists(setting_folder):
             os.makedirs(setting_folder)
         with open(setting_filename, 'w+') as f:
-            f.write(json.dumps(self.dump(), indent=4, ensure_ascii=False))
+            obj = json.dumps(self.dump(), indent=4, ensure_ascii=False)
+            f.write(obj)
+        self.signal_setting.emit()
 
 
 setting = Setting()

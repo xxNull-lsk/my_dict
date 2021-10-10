@@ -8,10 +8,9 @@ from src.backend.youdao import YouDaoFanYi
 
 
 class FindWord(QWidget):
-    def __init__(self, youdao: YouDaoFanYi, parent=None):
+    def __init__(self, youdao: YouDaoFanYi, star_dict: StartDict, parent=None):
         super().__init__(parent)
-
-        self.star_dict = StartDict(setting.star_dict_folder, True)
+        self.star_dict = star_dict
         self.youdao = youdao
         self.edit_word = QLineEdit()
         self.edit_word.setPlaceholderText("搜索单词")
@@ -44,4 +43,9 @@ class FindWord(QWidget):
         for k in res.keys():
             if res[k] == '':
                 continue
-            self.result.add_word_result(k, res[k])
+            count = len(setting.dicts_for_query)
+            if count < 1:
+                continue
+            if k in setting.dicts_for_query\
+                    or (count == 1 and setting.dicts_for_query[0] == "*"):
+                self.result.add_word_result(k, res[k])
