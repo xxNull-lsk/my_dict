@@ -1,7 +1,7 @@
 import json
 
 from PyQt5.QtCore import QRect, QTimer, Qt, QSize
-from PyQt5.QtGui import QCursor, QFont
+from PyQt5.QtGui import QCursor, QFont, QKeyEvent
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QWidget
 

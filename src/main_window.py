@@ -5,7 +5,7 @@ from src.backend.stardict import StartDict
 from src.setting import setting
 from src.UI.find_text import FindText
 from src.UI.find_word import FindWord
-from src.UI.clipboard import TipWindow
+from src.UI.tip_window import TipWindow
 from src.UI.setting import SettingWindow
 from src.tray_icon import TrayIcon
 from src.util import load_icon, get_version
