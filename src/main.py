@@ -1,13 +1,33 @@
 #!/bin/python3
+import fcntl
+import os
 import sys
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 
 from src.main_window import MainWindow
-from src.setting import setting
+from src.setting import setting, setting_folder
+
+flock = None
+
+
+def is_running():
+    global flock
+    if not os.path.exists(setting_folder):
+        os.makedirs(setting_folder)
+    flock = open(os.path.join(setting_folder, "lock"), 'w+')
+    try:
+        fcntl.flock(flock, fcntl.LOCK_NB | fcntl.LOCK_EX)
+        return False
+    except:
+        return True
 
 
 def main():
+    if is_running():
+        print("The application is running...")
+        return
     # os.environ['QT_DEBUG_PLUGINS'] = '1'
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
