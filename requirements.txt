@@ -2,3 +2,8 @@ PyQt5==5.14.0
 requests==2.26.0
 QDarkStyle==3.0.2
 pystardict==0.8
+opencv-python==4.2.0.32
+numpy==1.18.5
+system_hotkey
+xcffib
+xpybutil
