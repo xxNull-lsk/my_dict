@@ -7,3 +7,4 @@ numpy==1.18.5
 system_hotkey
 xcffib
 xpybutil
+pyzmq~=22.3.0

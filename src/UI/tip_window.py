@@ -15,12 +15,12 @@ from src.setting import setting
 
 class TipWindow(QWidget):
     last_text = ""
-    signal_query_text = pyqtSignal(str)
+    signal_hotkey = pyqtSignal()
 
     def __init__(self, youdao: YouDaoFanYi, star_dict: StartDict, app):
         super().__init__()
 
-        self.signal_query_text.connect(self.query)
+        self.signal_hotkey.connect(self.on_hotkey)
 
         self.star_dict = star_dict
         self.setMinimumSize(QSize(360, 280))
@@ -31,7 +31,7 @@ class TipWindow(QWidget):
         if setting.support_ocr:
             self.ocr = OCR(app)
             hk = SystemHotkey()
-            hk.register(setting.ocr_hotkey, callback=lambda x: self.signal_query_text.emit(self.ocr.get_text()))
+            hk.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
 
         self.youdao = youdao
         # self.setAttribute(Qt.WA_TranslucentBackground)            # 窗体背景透明
@@ -52,6 +52,9 @@ class TipWindow(QWidget):
         self.timer_hide = QTimer()
         self.timer_hide.timeout.connect(self.on_auto_hide)
 
+    def on_hotkey(self):
+        self.query(self.ocr.get_text())
+
     @staticmethod
     def on_play(media_player: QMediaPlayer):
         try:
@@ -61,6 +64,7 @@ class TipWindow(QWidget):
             print("Exception", ex)
 
     def query(self, txt):
+        print("query---")
         print("query: ", txt, "\nlast_text:", self.last_text)
         if txt is None or txt == '':
             return
