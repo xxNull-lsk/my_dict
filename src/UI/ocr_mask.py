@@ -99,14 +99,14 @@ class UiOcrMask(QDialog):
                 self.select_rect = rect
                 self.select_pt = pt1
                 self.select_image = self.img.copy(self.select_rect)
-                y = self.select_pt.y() - self.tools.height() - 2
-                if y < 0:
-                    y = self.pt2.y() + 2
-                if y > self.rect().height() - self.tools.height():
-                    y = self.rect().height() - self.tools.height()
-                x = self.select_pt.x()
-                if x + self.tools.width() > self.rect().width():
-                    x = self.rect().width() - self.tools.width()
+                # 计算工具条位置
+                # 最优先的是左下角，防止显示在屏幕外
+                y = pt2.y() + 2
+                if y > self.rect().height() - self.tools.height() - 2:
+                    y = self.rect().height() - self.tools.height() - 2
+                x = pt1.x()
+                if x > self.rect().width() - self.tools.width() - 2:
+                    x = self.rect().width() - self.tools.width() - 2
                 self.tools.move(QPoint(x, y))
                 self.tools.setVisible(True)
                 self.update()
