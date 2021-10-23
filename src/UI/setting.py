@@ -5,7 +5,7 @@ import sys
 
 import pystardict
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
-    QListWidget, QListWidgetItem
+    QListWidget, QListWidgetItem, QMessageBox
 
 from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
@@ -40,6 +40,22 @@ class SettingWindow(QWidget):
         self.checkbox_support_clipboard.setToolTip("复制两次触发取词")
         self.checkbox_support_clipboard.clicked.connect(self.on_save)
 
+        self.checkbox_support_ocr = QCheckBox("OCR取词")
+        self.checkbox_support_ocr.clicked.connect(self.on_save)
+
+        self.edit_ocr_hotkey = QLineEdit()
+        self.edit_ocr_hotkey.setReadOnly(True)
+        self.edit_ocr_hotkey.setPlaceholderText("OCR取词热键")
+        self.edit_ocr_hotkey.textChanged.connect(self.on_save)
+
+        self.edit_ocr_server = QLineEdit()
+        self.edit_ocr_server.setReadOnly(True)
+        self.edit_ocr_server.setPlaceholderText("OCR取词服务器")
+        self.edit_ocr_server.textChanged.connect(self.on_save)
+
+        self.button_ocr_server = QPushButton("安装")
+        self.button_ocr_server.clicked.connect(self.on_install_ocr_server)
+
         self.checkbox_show_main_window_when_startup = QCheckBox("启动时显示主窗口")
         self.checkbox_show_main_window_when_startup.clicked.connect(self.on_save)
 
@@ -63,6 +79,9 @@ class SettingWindow(QWidget):
         self.btn_open_dict_folder.clicked.connect(self.on_open_dict_folder)
 
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
+        self.checkbox_support_ocr.setChecked(setting.support_ocr)
+        self.edit_ocr_hotkey.setText("-".join(setting.ocr_hotkey))
+        self.edit_ocr_server.setText(setting.ocr_server)
         self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
         self.checkbox_auto_startup.setChecked(self.is_auto_startup())
 
@@ -76,6 +95,9 @@ class SettingWindow(QWidget):
         items = [
             [self.checkbox_use_dark_skin],
             [self.checkbox_support_clipboard],
+            [self.checkbox_support_ocr],
+            ["    OCR取词热键:", create_line([self.edit_ocr_hotkey])],
+            ["    OCR取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server])],
             [self.checkbox_show_main_window_when_startup],
             [self.checkbox_auto_startup],
             ["词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
@@ -138,6 +160,7 @@ class SettingWindow(QWidget):
     def on_save(self):
         setting.use_dark_skin = self.checkbox_use_dark_skin.isChecked()
         setting.support_clipboard = self.checkbox_support_clipboard.isChecked()
+        setting.support_ocr = self.checkbox_support_ocr.isChecked()
         setting.show_main_window_when_startup = self.checkbox_show_main_window_when_startup.isChecked()
         setting.star_dict_folder = self.edit_dict_folder.text()
         setting.save()
@@ -180,3 +203,6 @@ class SettingWindow(QWidget):
         dd = DownloadDialog(self, self.star_dict)
         dd.exec_()
         self.init_dict()
+
+    def on_install_ocr_server(self):
+        QMessageBox.information(self, "警告", "尚未实现")

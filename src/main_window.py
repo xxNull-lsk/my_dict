@@ -15,9 +15,9 @@ from src.backend.youdao import YouDaoFanYi
 class MainWindow(QWidget):
     btn_action = []
 
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
-        self.setGeometry(QRect(0, 0, 640, 480))
+        self.setGeometry(QRect(0, 0, 800, 600))
         self.tray = TrayIcon(self)
         self.tray.show()
 
@@ -26,9 +26,8 @@ class MainWindow(QWidget):
 
         self.youdao = YouDaoFanYi()
         self.star_dict = StartDict(setting.star_dict_folder, True)
-        if setting.support_clipboard:
-            self.tip_window = TipWindow(self.youdao, self.star_dict)
-            self.tip_window.hide()
+        self.tip_window = TipWindow(self.youdao, self.star_dict, app)
+        self.tip_window.hide()
 
         self.tab = QTabWidget()
         self.tab.addTab(FindWord(self.youdao, self.star_dict, self), '词典')

@@ -37,7 +37,7 @@ def main():
         app.setStyleSheet(dark_stylesheet)
     app.setApplicationName("MyDict")
     app.setQuitOnLastWindowClosed(False)
-    main_window = MainWindow()
+    main_window = MainWindow(app)
     if setting.show_main_window_when_startup:
         main_window.show()
     sys.exit(app.exec_())
