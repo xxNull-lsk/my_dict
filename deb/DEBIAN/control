@@ -1,0 +1,8 @@
+Package:myDict
+Version:0.2.2
+Section:free
+Priority:optional
+Architecture:amd64
+Maintainer:xxnull@163.com
+Provides:xxNull
+Description:一款支持剪贴板、OCR取词的词典。

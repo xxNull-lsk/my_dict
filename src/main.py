@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication
 
 from src.main_window import MainWindow
 from src.setting import setting, setting_folder
+from src.util import version
 
 flock = None
 
@@ -25,6 +26,9 @@ def is_running():
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == '-v':
+        print(version["curr"])
+        return
     if is_running():
         print("The application is running...")
         return

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Categories=Education;Translation
+Type=Application
+Icon=/opt/my_dict/app.png
+StartupNotify=false
+Terminal=false
+Name=MyDict
+GenericName=MyDict
+GenericName[zh_CN]=我的词典
+Name[zh_CN]=我的词典
+Exec=/opt/my_dict/我的词典
