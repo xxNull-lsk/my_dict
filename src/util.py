@@ -7,14 +7,14 @@ import traceback
 from PyQt5.QtGui import QIcon, QPixmap
 
 version = {
-    "curr": "0.1.2",
+    "curr": "0.2.2",
     "history": {
         "0.0.1": "实现基本功能:\n"
                  "  1、查词界面\n"
                  "  2、翻译界面\n"
                  "  3、剪贴板取词",
         "0.1.1": "支持本地词典",
-        "0.1.2": "1、防止多次运行\n"
+        "0.2.2": "1、防止多次运行\n"
                  "2、支持OCR取词"
     }
 }
