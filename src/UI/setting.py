@@ -2,15 +2,52 @@ import os
 import platform
 import subprocess
 import sys
+import threading
 
 import pystardict
+from PyQt5.QtCore import QTimer, QSize, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
-    QListWidget, QListWidgetItem, QMessageBox
+    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit
 
 from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
 from src.backend.stardict import StartDict
 from src.setting import setting
+from src.util import run_app
+
+
+class InstallOcrWindow(QDialog):
+    signal_log = pyqtSignal(str)
+    signal_finish = pyqtSignal(int)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle("安装OCR服务")
+        self.setFixedSize(QSize(640, 480))
+        self.edit = QTextEdit()
+        self.edit.setAcceptRichText(False)
+        self.edit.setReadOnly(True)
+        self.setLayout(create_line([self.edit]))
+
+        self.signal_log.connect(self.on_log)
+        self.signal_finish.connect(self.on_finish)
+        self.t = threading.Thread(target=self.do_install)
+        self.t.start()
+
+    def on_log(self, txt):
+        self.edit.append(txt)
+
+    def on_finish(self, ret):
+        if ret != 0:
+            QMessageBox.warning(self, "错误", "安装失败")
+            return
+        QMessageBox.information(self, "提示", "安装成功")
+        self.accept()
+
+    def do_install(self):
+        cmd = "docker pull xxnull/my_dict_ocr:latest"
+        ret = run_app(cmd, lambda x: self.signal_log.emit(x))
+        self.signal_finish.emit(ret)
 
 
 class SettingWindow(QWidget):
@@ -54,6 +91,7 @@ class SettingWindow(QWidget):
         self.edit_ocr_server.textChanged.connect(self.on_save)
 
         self.button_ocr_server = QPushButton("安装")
+        self.button_ocr_server.setMinimumWidth(80)
         self.button_ocr_server.clicked.connect(self.on_install_ocr_server)
 
         self.checkbox_show_main_window_when_startup = QCheckBox("启动时显示主窗口")
@@ -205,4 +243,5 @@ class SettingWindow(QWidget):
         self.init_dict()
 
     def on_install_ocr_server(self):
-        QMessageBox.information(self, "警告", "尚未实现")
+        dd = InstallOcrWindow(self)
+        dd.exec_()

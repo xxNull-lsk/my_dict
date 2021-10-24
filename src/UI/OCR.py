@@ -8,6 +8,8 @@ import numpy as np
 
 from src.UI.ocr_mask import UiOcrMask
 from src.setting import setting
+from src.util import run_app
+import threading
 
 
 class OcrServer:
@@ -17,6 +19,13 @@ class OcrServer:
         self.socket.connect(setting.ocr_server)
         self.socket.setsockopt(zmq.RCVTIMEO, 1000)
         self.socket.setsockopt(zmq.SNDTIMEO, 1000)
+        self.t = threading.Thread(target=self.start_local_server)
+        self.t.start()
+
+    @staticmethod
+    def start_local_server():
+        cmd = "docker run -itd --name my_dict_ocr -p 12126:12126 xxnull/my_dict_ocr:latest"
+        run_app(cmd, print)
 
     def get_english(self, mat):
         img = cv2.imencode('.jpg', mat)[1]

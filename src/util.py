@@ -1,5 +1,8 @@
 import os
+import shlex
+import subprocess
 import sys
+import traceback
 
 from PyQt5.QtGui import QIcon, QPixmap
 
@@ -34,3 +37,36 @@ def resource_path(relative_path):
 
 def load_icon(name):
     return QIcon(QPixmap(resource_path("./res/{}.png".format(name))))
+
+
+def log_line(log_function, line):
+    try:
+        log_function(line.decode('utf-8'))
+    except Exception as ex:
+        log_function("{}".format(traceback.format_exc()))
+        print(ex, traceback.format_exc())
+
+
+def run_app(cmd, log_function) -> int:
+    if isinstance(cmd, str):
+        cmd = shlex.split(cmd)
+    log_function("run app: {}".format(' '.join(cmd)))
+    try:
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        log_function("running app: {}".format(' '.join(cmd)))
+        while p.poll() is None:
+            line = p.stdout.readline()
+            log_line(log_function, line)
+
+        for line in p.stdout.readlines():
+            log_line(log_function, line)
+        log_function("running app finish. returncode={}".format(p.returncode))
+        return p.returncode
+    except Exception as ex:
+        print(ex)
+        log_function(traceback.format_exc())
+        return -2
