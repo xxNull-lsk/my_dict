@@ -14,13 +14,13 @@
 
 # 词典界面
 
-![截图_我的词典_20211017225135](readme.assets/%E6%88%AA%E5%9B%BE_%E6%88%91%E7%9A%84%E8%AF%8D%E5%85%B8_20211017225135.png)
+![zhuchuangkou](readme.assets/main.png)
 
 
 
 # 剪贴板取词
 
-![截图_选择区域_20211007210818](readme.assets/%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20211007210818.png)
+![剪贴板取词](readme.assets/clipboard.png)
 
 # OCR取词
 
@@ -28,11 +28,11 @@
 
 # 设置界面
 
-![截图_我的词典_20211010210806](readme.assets/%E6%88%AA%E5%9B%BE_%E6%88%91%E7%9A%84%E8%AF%8D%E5%85%B8_20211010210806.png)
+![设置界面](readme.assets/setting.png)
 
 # 下载离线词典
 
-![截图_我的词典_20211017224601](readme.assets/%E6%88%AA%E5%9B%BE_%E6%88%91%E7%9A%84%E8%AF%8D%E5%85%B8_20211017224601.png)
+![下载词典](readme.assets/download.png)
 
 # 支持的系统
 
