@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['src/main.py'],
-             pathex=['/home/allan/PycharmProjects/my_dict'],
+             pathex=['.'],
              binaries=[],
-             datas=[('/home/allan/PycharmProjects/my_dict/src/res', './res')],
+             datas=[('./src/res', './res')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
