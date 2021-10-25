@@ -66,6 +66,7 @@ class DownloadDialog(QDialog):
             "size": "2.8M"
         },
     }
+    t = None
 
     def __init__(self, parent, star_dict: StartDict):
         super().__init__(parent)
@@ -74,6 +75,7 @@ class DownloadDialog(QDialog):
         self.star_dict.signal_load_dict_finish.connect(self.init_dict)
         self.signal_reload_dict.connect(self.init_dict)
         self.signal_change_progress.connect(self.on_progress)
+
         self.setMinimumHeight(520)
         self.setMinimumWidth(760)
         self.list_dicts = QTableWidget()
@@ -136,8 +138,8 @@ class DownloadDialog(QDialog):
         self.btn_cancel_download.show()
         self.btn_cancel_download.setEnabled(not self.can_download)
         # download dict may be use very long time, so do it in a thread
-        t = threading.Thread(target=self.do_download, args=(sender.d["url"], ))
-        t.start()
+        self.t = threading.Thread(target=self.do_download, args=(sender.d["url"], ))
+        self.t.start()
 
     def on_progress(self, curr, total):
         self.progress.setMaximum(total)
@@ -171,4 +173,3 @@ class DownloadDialog(QDialog):
 
     def on_cancel_download(self):
         self.can_download = False
-        self.btn_cancel_download.setEnabled(not self.can_download)

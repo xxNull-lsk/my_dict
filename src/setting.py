@@ -1,21 +1,13 @@
 import json
 import os
 
-from PyQt5.QtCore import pyqtSignal, QObject
+from src.events import events
 
 setting_folder = "{}/.config/my_dict".format(os.environ["HOME"])
 setting_filename = "{}/setting.json".format(setting_folder)
 
 
-class SettingSignal(QObject):
-    signal_setting_changed = pyqtSignal()
-
-    def emit(self):
-        self.signal_setting_changed.emit()
-
-
 class Setting:
-    signal_setting = SettingSignal()
     star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
     support_ocr = True
@@ -64,7 +56,7 @@ class Setting:
         with open(setting_filename, 'w+') as f:
             obj = json.dumps(self.dump(), indent=4, ensure_ascii=False)
             f.write(obj)
-        self.signal_setting.emit()
+        events.signal_setting_changed.emit()
 
 
 setting = Setting()

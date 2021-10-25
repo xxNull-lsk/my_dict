@@ -1,12 +1,31 @@
 import sys
 
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QMessageBox
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QDialog, QLabel
 
-from src.util import resource_path, get_version
+from src.UI.util import create_form, create_multi_line, create_line
+from src.events import events
+from src.util import resource_path, version
+
+
+class About(QDialog):
+    def __init__(self):
+        super().__init__()
+        url_project = QLabel(
+            u'<a href="https://github.com/xxNull-lsk/my_dict">https://github.com/xxNull-lsk/my_dict</a>'
+        )
+        url_project.setOpenExternalLinks(True)
+        url_email = QLabel(u'<a href="mailto:xxNull@163.com">联系我</a>')
+        url_email.setOpenExternalLinks(True)
+        layout = create_form([
+            ["版本号：", QLabel(version["curr"])],
+            ["项目地址：", url_project]
+        ], space=16)
+        self.setLayout(create_multi_line([layout, create_line([1, url_email, 1])], space=16))
 
 
 class TrayIcon(QSystemTrayIcon):
+
     def __init__(self, parent=None):
         super(TrayIcon, self).__init__(parent)
         self.menu = QMenu()
@@ -15,9 +34,12 @@ class TrayIcon(QSystemTrayIcon):
         self.menu.addSeparator()
         self.menu.addAction(QAction("退出", parent, triggered=self.on_quit))
         self.setContextMenu(self.menu)
-        ico_dict = QIcon(QPixmap(resource_path("./res/dict.png")))
-        self.setIcon(ico_dict)
+        self.ico_dict = QIcon(QPixmap(resource_path("./res/dict.png")))
+        self.setIcon(self.ico_dict)
         self.activated.connect(self.on_activated)
+        self.setToolTip("我的词典 {}".format(version["curr"]))
+
+        events.signal_pop_message.connect(self.pop_message)
 
     def on_quit(self):
         self.setVisible(False)
@@ -25,10 +47,18 @@ class TrayIcon(QSystemTrayIcon):
 
     @staticmethod
     def on_about():
-        QMessageBox.about(None, "关于", "我的字典 {}\nhttps://github.com/xxNull-lsk/my_dict".format(get_version()))
+        About().exec()
 
     def on_show(self):
-        self.parent().show()
+        self.on_activated()
 
     def on_activated(self):
-        self.parent().show()
+        self.parent().activateWindow()
+        self.parent().showNormal()
+
+    def pop_message(self, msg):
+        # fixme: pyinstaller 打包后会报错，找不到符号
+        #  symbol _ZN22QGuiApplicationPrivate28sendApplicationPaletteChangeEbPKc
+        #  version Qt_5_PRIVATE_API not defined in file libQt5Gui.so.5 with link time reference
+        # self.showMessage("我的词典", msg, self.ico_dict)
+        print(msg)

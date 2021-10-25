@@ -5,7 +5,7 @@ import sys
 import threading
 
 import pystardict
-from PyQt5.QtCore import QTimer, QSize, pyqtSignal
+from PyQt5.QtCore import QSize, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
     QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit
 
@@ -74,7 +74,7 @@ class SettingWindow(QWidget):
         self.checkbox_use_dark_skin.clicked.connect(self.on_save)
 
         self.checkbox_support_clipboard = QCheckBox("剪贴板取词（复制两次触发取词）")
-        self.checkbox_support_clipboard.setToolTip("复制两次触发取词")
+        self.checkbox_support_clipboard.setToolTip("复制3次触发取词")
         self.checkbox_support_clipboard.clicked.connect(self.on_save)
 
         self.checkbox_support_ocr = QCheckBox("OCR取词")

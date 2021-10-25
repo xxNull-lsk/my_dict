@@ -58,12 +58,13 @@ def create_grid(items, space=5):
     return gl
 
 
-def create_form(items):
+def create_form(items, space=5):
     col_count = 0
     for line in items:
         col_count = max(col_count, len(line))
 
     qfl = QFormLayout()
+    qfl.setSpacing(space)
     for line in items:
         if len(line) == 0:
             qfl.addWidget(QLabel(""))
@@ -82,3 +83,4 @@ def create_form(items):
                 hbox.addWidget(i)
             qfl.addItem(hbox)
     return qfl
+

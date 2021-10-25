@@ -4,6 +4,7 @@ from PyQt5.QtCore import QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QWidget, QLabel, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox
 
+from src.events import events
 from src.util import load_icon
 from src.backend.youdao import YouDaoFanYi
 
@@ -72,7 +73,9 @@ class ResultWindow(QWidget):
 
     def show_text_result(self, result):
         if "errorCode" not in result or result["errorCode"] != 0:
-            QMessageBox.critical(self, "错误", json.dumps(result, indent=4), QMessageBox.Ok)
+            print("错误", json.dumps(result, indent=4))
+            events.signal_pop_message.emit("查询失败")
+            # QMessageBox.critical(self, "错误", json.dumps(result, indent=4), QMessageBox.Ok)
             return False
         res = ''
         for groups in result["translateResult"]:
@@ -105,20 +108,25 @@ class ResultWindow(QWidget):
             )
             self.media_player_uk.play()
             self.btn_uk.show()
+        else:
+            self.btn_uk.hide()
+        if 'uksm' in result:
             self.label_uksm.setText("[{}]".format(result['uksm']))
             self.label_uksm.show()
         else:
-            self.btn_uk.hide()
             self.label_uksm.hide()
+
         if 'usspeach' in result and result['usspeach'] != '':
             self.media_player_us.setMedia(
                 QMediaContent(QUrl(YouDaoFanYi.voice_addr(result['usspeach'])))
             )
             self.btn_us.show()
+        else:
+            self.btn_us.hide()
+        if 'ussm' in result:
             self.label_ussm.setText("[{}]".format(result['ussm']))
             self.label_ussm.show()
         else:
-            self.btn_us.hide()
             self.label_ussm.hide()
         self.edit_res.clear()
         self.edit_res.setHtml(res)
