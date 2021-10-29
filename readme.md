@@ -46,3 +46,9 @@
 
 - 感谢stardict项目，该程序的离线词典使用的该项目的词典。下载地址：http://download.huzheng.org
 - 在线查词和翻译功能使用了有道词典的API，所有权归有道，不晓得是否可以使用，侵删。
+
+
+
+# 开发
+
+http://home.mydata.top:8093/?cat=10
