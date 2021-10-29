@@ -2,6 +2,9 @@ from googletrans import Translator
 
 
 class Google(object):
+    last_word = None
+    last_result = None
+
     def __init__(self):
         super().__init__()
         self.translator = Translator(service_urls=[
@@ -9,6 +12,8 @@ class Google(object):
         ])
 
     def translate(self, txt: str):
+        if self.last_word == txt:
+            return self.last_result
         try:
             self.translator.detect(txt)
             response = self.translator.translate(txt, dest="zh-cn")
@@ -33,4 +38,6 @@ class Google(object):
                 "sm": ""
             }
         }
+        self.last_word = txt
+        self.last_result = result
         return result

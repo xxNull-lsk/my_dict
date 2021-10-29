@@ -15,6 +15,7 @@ class FindWord(QWidget):
         self.edit_word = QLineEdit()
         self.edit_word.setPlaceholderText("搜索单词")
         self.edit_word.setClearButtonEnabled(True)
+        self.edit_word.returnPressed.connect(self.on_find)
         self.btn_find = QPushButton("查询")
         self.btn_find.setMinimumWidth(120)
         self.btn_find.clicked.connect(self.on_find)

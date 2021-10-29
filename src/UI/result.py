@@ -11,6 +11,7 @@ from src.backend.youdao import YouDaoFanYi
 
 class ResultWindow(QWidget):
     src = ""
+    online_results = []
     css = '<style type="text/css">\n' \
           'div.title {\n' \
           ' color: rgb(120, 120, 120);\n' \
@@ -78,6 +79,7 @@ class ResultWindow(QWidget):
 
     def reset(self, src):
         self.src = src
+        self.online_results = []
         self.btn_uk.hide()
         self.label_uksm.hide()
         self.btn_us.hide()
@@ -87,6 +89,12 @@ class ResultWindow(QWidget):
     def on_translate_finish(self, src, result):
         if self.src != src:
             return
+        # 用户多次点击时会发起多次网络查询请求。
+        # 由于网络原因，多次请求可以同时到达。
+        # 于是，就会接收到多个相同的内容。
+        if result["server"] in self.online_results:
+            return
+        self.online_results.append(result["server"])
         if result["is_word"]:
             self._add_online_word_result(result)
         else:

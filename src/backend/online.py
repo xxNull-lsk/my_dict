@@ -27,6 +27,6 @@ class OnLine(object):
         result = self.servers[server].translate(txt)
         if result is None:
             return
-        print(server, result)
+        # print(server, result)
         result["server"] = setting.online[server]["name"]
         events.signal_translate_finish.emit(txt, result)

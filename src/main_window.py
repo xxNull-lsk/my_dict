@@ -1,9 +1,7 @@
-from PyQt5.QtCore import QSize, QRect
-from PyQt5.QtGui import QPalette, QBrush, QColor
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget, QMainWindow
+from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget
 from qdarkstyle import LightPalette
 
-from src.backend.google import Google
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
 from src.events import events
@@ -14,7 +12,6 @@ from src.UI.tip_window import TipWindow
 from src.UI.setting import SettingWindow
 from src.tray_icon import TrayIcon
 from src.util import load_icon, get_version
-from src.backend.youdao import YouDaoFanYi
 
 
 class MainWindow(QWidget):
