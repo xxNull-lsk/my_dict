@@ -16,11 +16,13 @@
 
 ![zhuchuangkou](readme.assets/main.png)
 
-
+![zhuchuangkou](readme.assets/main2.png)
 
 # 剪贴板取词
 
 ![剪贴板取词](readme.assets/clipboard.png)
+
+![剪贴板取词](readme.assets/clipboard2.png)
 
 # OCR取词
 
