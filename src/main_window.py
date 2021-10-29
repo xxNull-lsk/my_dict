@@ -1,7 +1,10 @@
 from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtGui import QPalette, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget, QMainWindow
+from qdarkstyle import LightPalette
 
 from src.backend.stardict import StartDict
+from src.events import events
 from src.setting import setting
 from src.UI.find_text import FindText
 from src.UI.find_word import FindWord
@@ -17,6 +20,10 @@ class MainWindow(QWidget):
 
     def __init__(self, app):
         super().__init__()
+        self.app = app
+        self.on_setting_changed()
+        events.signal_setting_changed.connect(self.on_setting_changed)
+
         self.setGeometry(QRect(0, 0, 800, 600))
         self.tray = TrayIcon(self)
         self.tray.show()
@@ -43,6 +50,16 @@ class MainWindow(QWidget):
         self.setLayout(hbox)
 
         self.center()
+
+    def on_setting_changed(self):
+        import qdarkstyle
+        if setting.use_dark_skin:
+            dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
+            self.app.setStyleSheet(dark_stylesheet)
+        else:
+            style = qdarkstyle.load_stylesheet(palette=LightPalette)
+            self.app.setStyleSheet(style)
+            # self.app.setStyleSheet("")
 
     def center(self):
         rect = self.frameGeometry()

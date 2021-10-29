@@ -1,31 +1,10 @@
-from PyQt5.QtCore import Qt, QRect, QPoint, QRectF, QSize
-from PyQt5.QtGui import QScreen, QPainter, QPixmap, QColor, QImage, QIcon, QBrush, QPainterPath
-from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
+from PyQt5.QtCore import Qt, QRect, QPoint, QSize
+from PyQt5.QtGui import QScreen, QPainter, QPixmap, QColor, QImage
+from PyQt5.QtWidgets import QDialog, QPushButton
 
+from src.UI.BaseWidget import BaseWidget
 from src.UI.util import create_line
 from src.util import load_icon
-
-
-class UiTools(QWidget):
-    """圆角边框类"""
-    def __init__(self, parent=None):
-        super(UiTools, self).__init__(parent)
-        self.border_width = 8
-        # 设置 窗口无边框和背景透明 *必须
-        self.setAttribute(Qt.WA_TranslucentBackground)
-
-    def paintEvent(self, event):
-        pat = QPainter(self)
-        pat.setRenderHint(pat.Antialiasing)
-        color = QColor(128, 128, 128, 150)
-        pat.setPen(color)
-        pat.setBrush(color)
-        rect = self.rect()
-        rect.setLeft(5)
-        rect.setTop(5)
-        rect.setWidth(rect.width() - 5)
-        rect.setHeight(rect.height() - 5)
-        pat.drawRoundedRect(rect, 4, 4)
 
 
 class UiOcrMask(QDialog):
@@ -52,7 +31,7 @@ class UiOcrMask(QDialog):
             height=screen_rect.height(),
         )
         self.img: QImage = shot.toImage()
-        self.tools = UiTools(self)
+        self.tools = BaseWidget(self)
         self.tools.setHidden(True)
         self.tools.setFixedHeight(64)
 

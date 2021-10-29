@@ -35,10 +35,6 @@ def main():
     # os.environ['QT_DEBUG_PLUGINS'] = '1'
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    if setting.use_dark_skin:
-        import qdarkstyle
-        dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
-        app.setStyleSheet(dark_stylesheet)
     app.setApplicationName("MyDict")
     app.setQuitOnLastWindowClosed(False)
     main_window = MainWindow(app)

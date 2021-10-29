@@ -5,15 +5,52 @@ import sys
 import threading
 
 import pystardict
-from PyQt5.QtCore import QSize, pyqtSignal
+from PyQt5.QtCore import QSize, pyqtSignal, Qt
+from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
-    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit
+    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel
 
 from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
 from src.backend.stardict import StartDict
 from src.setting import setting
 from src.util import run_app
+
+
+class GetHotkey(QDialog):
+    hotkey = []
+
+    def __init__(self, parent, hotkey):
+        super().__init__(parent)
+        self.label = QLabel(hotkey)
+        self.btn = QPushButton("OK")
+        self.btn.setFixedWidth(80)
+        self.btn.clicked.connect(self.accept)
+        layout = create_multi_line([
+            create_line([1, self.label, 1]),
+            create_line([1, self.btn, 1])
+        ])
+        self.setWindowTitle("更改热键")
+        self.setLayout(layout)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        m = event.modifiers()
+        hotkey = []
+        if m & Qt.ShiftModifier:
+            hotkey.append("shift")
+        if m & Qt.ControlModifier:
+            hotkey.append("control")
+        if m & Qt.AltModifier:
+            hotkey.append("alt")
+        k = event.key()
+        if 48 <= k <= 57 or 65 <= k <= 90 or 97 <= k <= 122:
+            hotkey.append(chr(k).lower())
+
+        if k == Qt.Key_Escape:
+            hotkey = []
+
+        self.label.setText(' - '.join(hotkey).upper() if len(hotkey) > 0 else '禁用')
+        self.hotkey = hotkey
 
 
 class InstallOcrWindow(QDialog):
@@ -73,21 +110,23 @@ class SettingWindow(QWidget):
         self.checkbox_use_dark_skin.setChecked(setting.use_dark_skin)
         self.checkbox_use_dark_skin.clicked.connect(self.on_save)
 
-        self.checkbox_support_clipboard = QCheckBox("剪贴板取词（复制两次触发取词）")
+        self.checkbox_support_clipboard = QCheckBox("剪贴板取词（复制3次触发取词）")
         self.checkbox_support_clipboard.setToolTip("复制3次触发取词")
         self.checkbox_support_clipboard.clicked.connect(self.on_save)
 
         self.checkbox_support_ocr = QCheckBox("OCR取词")
         self.checkbox_support_ocr.clicked.connect(self.on_save)
 
-        self.edit_ocr_hotkey = QLineEdit()
-        self.edit_ocr_hotkey.setReadOnly(True)
-        self.edit_ocr_hotkey.setPlaceholderText("OCR取词热键")
-        self.edit_ocr_hotkey.textChanged.connect(self.on_save)
+        self.edit_ocr_hotkey = QPushButton(
+            " - ".join(setting.ocr_hotkey).upper() if len(setting.ocr_hotkey) > 0 else '禁用'
+        )
+        self.edit_ocr_hotkey.clicked.connect(self.on_change_hotkey)
+        self.edit_ocr_hotkey.setFlat(True)
 
         self.edit_ocr_server = QLineEdit()
         self.edit_ocr_server.setReadOnly(True)
-        self.edit_ocr_server.setPlaceholderText("OCR取词服务器")
+        self.edit_ocr_server.setPlaceholderText("取词服务器")
+        self.edit_ocr_server.setText(setting.ocr_server)
         self.edit_ocr_server.textChanged.connect(self.on_save)
 
         self.button_ocr_server = QPushButton("安装")
@@ -118,8 +157,6 @@ class SettingWindow(QWidget):
 
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
         self.checkbox_support_ocr.setChecked(setting.support_ocr)
-        self.edit_ocr_hotkey.setText("-".join(setting.ocr_hotkey))
-        self.edit_ocr_server.setText(setting.ocr_server)
         self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
         self.checkbox_auto_startup.setChecked(self.is_auto_startup())
 
@@ -134,8 +171,8 @@ class SettingWindow(QWidget):
             [self.checkbox_use_dark_skin],
             [self.checkbox_support_clipboard],
             [self.checkbox_support_ocr],
-            ["    OCR取词热键:", create_line([self.edit_ocr_hotkey])],
-            ["    OCR取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server])],
+            ["    取词热键:", create_line([self.edit_ocr_hotkey])],
+            ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server])],
             [self.checkbox_show_main_window_when_startup],
             [self.checkbox_auto_startup],
             ["词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
@@ -245,3 +282,11 @@ class SettingWindow(QWidget):
     def on_install_ocr_server(self):
         dd = InstallOcrWindow(self)
         dd.exec_()
+
+    def on_change_hotkey(self):
+        dd = GetHotkey(self, self.edit_ocr_hotkey.text())
+        ret = dd.exec_()
+        if ret == 1:
+            self.edit_ocr_hotkey.setText(' - '.join(dd.hotkey).upper() if len(dd.hotkey) > 0 else '禁用')
+            setting.ocr_hotkey = dd.hotkey
+            setting.save()

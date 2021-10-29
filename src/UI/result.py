@@ -1,6 +1,6 @@
 import json
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QWidget, QLabel, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox
 
@@ -18,7 +18,7 @@ class ResultWindow(QWidget):
           '}\n' \
           '</style>'
 
-    def __init__(self, parent):
+    def __init__(self, parent, translucent=False):
         super().__init__(parent)
 
         self.edit_res = QTextEdit()
@@ -30,14 +30,14 @@ class ResultWindow(QWidget):
         self.label_uksm.hide()
 
         self.media_player_us = QMediaPlayer()
-        self.btn_us = QPushButton("美音")
+        self.btn_us = QPushButton("  美音  ")
         self.btn_us.setParent(self)
         self.btn_us.setIcon(load_icon("voice"))
         self.btn_us.hide()
         self.btn_us.setFlat(True)
         self.btn_us.clicked.connect(lambda: self.on_play(self.media_player_us))
         self.media_player_uk = QMediaPlayer()
-        self.btn_uk = QPushButton("英音")
+        self.btn_uk = QPushButton("  英音  ")
         self.btn_uk.setParent(self)
         self.btn_uk.setIcon(load_icon("voice"))
         self.btn_uk.hide()
@@ -55,6 +55,16 @@ class ResultWindow(QWidget):
         vbox = QVBoxLayout()
         vbox.addItem(hbox)
         vbox.addWidget(self.edit_res)
+        if translucent:
+            self.label_uksm.setAttribute(Qt.WA_TranslucentBackground)
+            self.label_ussm.setAttribute(Qt.WA_TranslucentBackground)
+            self.btn_uk.setAttribute(Qt.WA_TranslucentBackground)
+            self.edit_res.setAttribute(Qt.WA_TranslucentBackground)
+            for i in range(0, hbox.count()):
+                w = hbox.itemAt(i)
+                if isinstance(w, QWidget):
+                    print(i, "Qt.WA_TranslucentBackground")
+                    w.setAttribute(Qt.WA_TranslucentBackground)
         self.setLayout(vbox)
 
     @staticmethod

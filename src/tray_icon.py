@@ -57,8 +57,4 @@ class TrayIcon(QSystemTrayIcon):
         self.parent().showNormal()
 
     def pop_message(self, msg):
-        # fixme: pyinstaller 打包后会报错，找不到符号
-        #  symbol _ZN22QGuiApplicationPrivate28sendApplicationPaletteChangeEbPKc
-        #  version Qt_5_PRIVATE_API not defined in file libQt5Gui.so.5 with link time reference
-        # self.showMessage("我的词典", msg, self.ico_dict)
-        print(msg)
+        self.showMessage("我的词典", msg, self.ico_dict)
