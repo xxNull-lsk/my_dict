@@ -185,9 +185,32 @@ class SettingWindow(QWidget):
     def init_dict(self):
         self.list_query_dicts.clear()
         self.list_clipboard_dicts.clear()
+
+        for k in setting.online.keys():
+            item = QListWidgetItem()
+            item.setData(Qt.UserRole, k)
+            self.list_query_dicts.addItem(item)
+            checkbox1 = QCheckBox(setting.online[k]["name"])
+            checkbox1.clicked.connect(self.on_clicked_list_query_dicts)
+            if k in setting.dicts_for_query or\
+                    (len(setting.dicts_for_query) == 1 and setting.dicts_for_query[0] == "*"):
+                checkbox1.setChecked(True)
+            self.list_query_dicts.setItemWidget(item, checkbox1)
+
+            item2 = QListWidgetItem()
+            item2.setData(Qt.UserRole, k)
+            self.list_clipboard_dicts.addItem(item2)
+            checkbox2 = QCheckBox(setting.online[k]["name"])
+            checkbox2.clicked.connect(self.on_clicked_list_clipboard_dicts)
+            if k in setting.dicts_for_clipboard or\
+                    (len(setting.dicts_for_clipboard) == 1 and setting.dicts_for_clipboard[0] == "*"):
+                checkbox2.setChecked(True)
+            self.list_clipboard_dicts.setItemWidget(item2, checkbox2)
+
         for i in self.star_dict.list():
             i: pystardict.Dictionary
             item = QListWidgetItem()
+            item.setData(Qt.UserRole, i.ifo.bookname)
             self.list_query_dicts.addItem(item)
             checkbox1 = QCheckBox(i.ifo.bookname)
             checkbox1.clicked.connect(self.on_clicked_list_query_dicts)
@@ -195,7 +218,9 @@ class SettingWindow(QWidget):
                     (len(setting.dicts_for_query) == 1 and setting.dicts_for_query[0] == "*"):
                 checkbox1.setChecked(True)
             self.list_query_dicts.setItemWidget(item, checkbox1)
+
             item2 = QListWidgetItem()
+            item2.setData(Qt.UserRole, i.ifo.bookname)
             self.list_clipboard_dicts.addItem(item2)
             checkbox2 = QCheckBox(i.ifo.bookname)
             checkbox2.clicked.connect(self.on_clicked_list_clipboard_dicts)
@@ -206,12 +231,12 @@ class SettingWindow(QWidget):
 
     def on_clicked_list_query_dicts(self):
         count = self.list_query_dicts.count()
-        cb_list = [self.list_query_dicts.itemWidget(self.list_query_dicts.item(i))
-                   for i in range(count)]
         chooses = []
-        for cb in cb_list:
+        for i in range(count):
+            item = self.list_query_dicts.item(i)
+            cb = self.list_query_dicts.itemWidget(item)
             if cb.isChecked():
-                chooses.append(cb.text())
+                chooses.append(item.data(Qt.UserRole))
         if len(chooses) == count:
             setting.dicts_for_query = ["*"]
         else:
@@ -220,12 +245,12 @@ class SettingWindow(QWidget):
 
     def on_clicked_list_clipboard_dicts(self):
         count = self.list_clipboard_dicts.count()
-        cb_list = [self.list_clipboard_dicts.itemWidget(self.list_clipboard_dicts.item(i))
-                   for i in range(count)]
         chooses = []
-        for cb in cb_list:
+        for i in range(count):
+            item = self.list_clipboard_dicts.item(i)
+            cb = self.list_clipboard_dicts.itemWidget(item)
             if cb.isChecked():
-                chooses.append(cb.text())
+                chooses.append(item.data(Qt.UserRole))
         if len(chooses) == count:
             setting.dicts_for_clipboard = ["*"]
         else:

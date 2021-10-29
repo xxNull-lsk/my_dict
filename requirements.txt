@@ -10,3 +10,4 @@ system_hotkey
 xcffib
 xpybutil
 pyzmq~=22.3.0
+googletrans>=4.0.0rc1

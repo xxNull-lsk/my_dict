@@ -3,6 +3,8 @@ from PyQt5.QtGui import QPalette, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget, QMainWindow
 from qdarkstyle import LightPalette
 
+from src.backend.google import Google
+from src.backend.online import OnLine
 from src.backend.stardict import StartDict
 from src.events import events
 from src.setting import setting
@@ -31,14 +33,14 @@ class MainWindow(QWidget):
         self.setWindowIcon(load_icon("dict"))
         self.setWindowTitle("我的词典 {}".format(get_version()))
 
-        self.youdao = YouDaoFanYi()
+        self.online = OnLine()
         self.star_dict = StartDict(setting.star_dict_folder, True)
-        self.tip_window = TipWindow(self.youdao, self.star_dict, app)
+        self.tip_window = TipWindow(self.online, self.star_dict, app)
         self.tip_window.hide()
 
         self.tab = QTabWidget()
-        self.tab.addTab(FindWord(self.youdao, self.star_dict, self), '词典')
-        self.tab.addTab(FindText(self.youdao, self), '翻译')
+        self.tab.addTab(FindWord(self.online, self.star_dict, self), '词典')
+        self.tab.addTab(FindText(self.online, self), '翻译')
         self.tab.addTab(SettingWindow(self, self.star_dict), '设置')
         self.tab.tabBar().setMinimumWidth(200)
         self.tab.tabBar().setTabIcon(0, load_icon("word"))

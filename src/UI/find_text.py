@@ -1,15 +1,15 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QTextEdit, QVBoxLayout, QHBoxLayout
 
 from src.UI.result import ResultWindow
+from src.backend.online import OnLine
 from src.util import load_icon
-from src.backend.youdao import YouDaoFanYi
 
 
 class FindText(QWidget):
-    def __init__(self, youdao: YouDaoFanYi, parent=None):
+    def __init__(self, online: OnLine, parent=None):
         super().__init__(parent)
 
-        self.youdao = youdao
+        self.online = online
         self.btn_clear = QPushButton("清空")
         self.btn_clear.setMinimumWidth(120)
         self.btn_clear.clicked.connect(lambda: self.edit_text.clear())
@@ -39,5 +39,6 @@ class FindText(QWidget):
     def on_find(self):
         if self.edit_text.toPlainText() == '':
             return
-        result = self.youdao.translate_text(self.edit_text.toPlainText())
-        self.result.show_text_result(result)
+        txt = self.edit_text.toPlainText()
+        self.result.reset(txt)
+        self.online.translate(txt)

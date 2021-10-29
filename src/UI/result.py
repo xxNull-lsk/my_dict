@@ -10,7 +10,7 @@ from src.backend.youdao import YouDaoFanYi
 
 
 class ResultWindow(QWidget):
-    last_text = ""
+    src = ""
     css = '<style type="text/css">\n' \
           'div.title {\n' \
           ' color: rgb(120, 120, 120);\n' \
@@ -20,6 +20,7 @@ class ResultWindow(QWidget):
 
     def __init__(self, parent, translucent=False):
         super().__init__(parent)
+        events.signal_translate_finish.connect(self.on_translate_finish)
 
         self.edit_res = QTextEdit()
         self.edit_res.setReadOnly(True)
@@ -75,71 +76,77 @@ class ResultWindow(QWidget):
         except Exception as ex:
             print("Exception", ex)
 
-    def set_result(self, is_word, result):
-        if is_word:
-            return self.show_word_result(result)
-        else:
-            return self.show_text_result(result)
+    def reset(self, src):
+        self.src = src
+        self.btn_uk.hide()
+        self.label_uksm.hide()
+        self.btn_us.hide()
+        self.label_ussm.hide()
+        self.edit_res.clear()
 
-    def show_text_result(self, result):
-        if "errorCode" not in result or result["errorCode"] != 0:
+    def on_translate_finish(self, src, result):
+        if self.src != src:
+            return
+        if result["is_word"]:
+            self._add_online_word_result(result)
+        else:
+            self._add_online_text_result(result)
+
+    def _add_online_text_result(self, result):
+        if "error_code" in result and result["error_code"] != 0:
             print("错误", json.dumps(result, indent=4))
             events.signal_pop_message.emit("查询失败")
-            # QMessageBox.critical(self, "错误", json.dumps(result, indent=4), QMessageBox.Ok)
             return False
         res = ''
-        for groups in result["translateResult"]:
-            for i in groups:
-                if res != '':
-                    res += "\n"
-                res += "{}\n    {}".format(
-                    i['src'],
-                    i['tgt']
-                )
-
-        self.btn_uk.hide()
-        self.btn_us.hide()
-        self.edit_res.clear()
-        self.edit_res.setText(res)
-        return True
-
-    def show_word_result(self, result):
-        if 'basic' not in result:
-            return False
-        res = ''
-        for item in result["basic"]:
+        for target in result["target"]:
             if res != '':
                 res += "<br>"
-            res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(self.plan2html(item))
-        res = self.css + "<div class=\"title\">有道词典</div><p>" + res + "</p>"
-        if 'ukspeach' in result and result['ukspeach'] != '':
-            self.media_player_uk.setMedia(
-                QMediaContent(QUrl(YouDaoFanYi.voice_addr(result['ukspeach'])))
+            res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(
+                self.plan2html(target)
             )
-            self.media_player_uk.play()
-            self.btn_uk.show()
-        else:
-            self.btn_uk.hide()
-        if 'uksm' in result:
-            self.label_uksm.setText("[{}]".format(result['uksm']))
-            self.label_uksm.show()
-        else:
-            self.label_uksm.hide()
+        res = self.css + "<div class=\"title\">{}</div><p>".format(result["server"]) + res + "</p>"
+        html = self.edit_res.toHtml()
+        self.edit_res.setHtml("{}{}".format(res, html))
+        return True
 
-        if 'usspeach' in result and result['usspeach'] != '':
-            self.media_player_us.setMedia(
-                QMediaContent(QUrl(YouDaoFanYi.voice_addr(result['usspeach'])))
+    def _add_online_word_result(self, result):
+        if result['error_code'] != 0:
+            return False
+        res = ''
+        for item in result["target"]:
+            if res != '':
+                res += "<br>"
+            res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(
+                self.plan2html(item)
             )
-            self.btn_us.show()
-        else:
-            self.btn_us.hide()
-        if 'ussm' in result:
-            self.label_ussm.setText("[{}]".format(result['ussm']))
-            self.label_ussm.show()
-        else:
-            self.label_ussm.hide()
-        self.edit_res.clear()
-        self.edit_res.setHtml(res)
+        res = self.css + "<div class=\"title\">{}</div><p>".format(result["server"]) + res + "</p>"
+
+        if 'uk' in result:
+            uk = result['uk']
+            if uk['speach'] != '':
+                self.media_player_uk.setMedia(
+                    QMediaContent(QUrl(YouDaoFanYi.voice_addr(uk['speach'])))
+                )
+                self.media_player_uk.play()
+                self.btn_uk.show()
+            if uk['sm'] != '':
+                self.label_uksm.setText("[{}]".format(uk['sm']))
+                self.label_uksm.show()
+
+        if 'us' in result:
+            us = result['us']
+            if us['speach'] != '':
+                self.media_player_us.setMedia(
+                    QMediaContent(QUrl(YouDaoFanYi.voice_addr(us['speach'])))
+                )
+                self.media_player_us.play()
+                self.btn_us.show()
+            if us['sm'] != '':
+                self.label_ussm.setText("[{}]".format(us['sm']))
+                self.label_ussm.show()
+                
+        html = self.edit_res.toHtml()
+        self.edit_res.setHtml("{}{}".format(res, html))
         return True
 
     @staticmethod

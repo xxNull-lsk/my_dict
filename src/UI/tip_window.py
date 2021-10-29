@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRect, QTimer, Qt, QSize, pyqtSignal
-from PyQt5.QtGui import QCursor, QFont, QColor
+from PyQt5.QtCore import QRect, QTimer, Qt, QSize, pyqtSignal, QPoint
+from PyQt5.QtGui import QCursor, QFont, QColor, QMouseEvent
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QWidget, QPushButton
 from system_hotkey import SystemHotkey
@@ -7,9 +7,9 @@ from system_hotkey import SystemHotkey
 from src.UI.BaseWidget import BaseWidget
 from src.UI.OCR import OCR
 from src.UI.result import ResultWindow
-from src.UI.util import create_line
+from src.UI.util import create_line, create_multi_line
+from src.backend.online import OnLine
 from src.backend.stardict import StartDict
-from src.backend.youdao import YouDaoFanYi
 from src.events import events
 from src.setting import setting
 from src.util import load_icon
@@ -21,35 +21,51 @@ class TipWindow(BaseWidget):
     clipboard = None
     ocr = None
     is_in_hotkey = False
+    _startPos = None
+    _endPos = None
+    _isTracking = False
 
-    def __init__(self, youdao: YouDaoFanYi, star_dict: StartDict, app):
+    def __init__(self, online: OnLine, star_dict: StartDict, app):
         super().__init__()
-
+        self.src = ""
         self.app = app
         self.signal_hotkey.connect(self.on_hotkey)
         events.signal_setting_changed.connect(self.on_setting_changed)
+        events.signal_translate_finish.connect(self.on_translate_finish)
 
         self.star_dict = star_dict
         self.setMinimumSize(QSize(360, 280))
+        self.setMaximumWidth(360)
 
-        self.youdao = youdao
+        self.online = online
         # 窗口置顶，无边框，在任务栏不显示图标
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.BypassWindowManagerHint | Qt.FramelessWindowHint | Qt.Tool)
-        font = QFont()
-        font.setFamily("Mono")
-        font.setPointSize(16)
-        font.setWeight(75)
-        font.setBold(True)
+
+        self.font_word = QFont()
+        self.font_word.setFamily("Mono")
+        self.font_word.setPointSize(16)
+        self.font_word.setWeight(75)
+        self.font_word.setBold(True)
+
+        self.font_text = QFont()
+        self.font_text.setFamily("Mono")
+        self.font_text.setPointSize(11)
+        self.font_text.setBold(False)
+
         self.label_src = QLabel()
-        self.label_src.setFont(font)
+        self.label_src.setWordWrap(True)
+        self.label_src.setFont(self.font_text)
         self.label_src.setAttribute(Qt.WA_TranslucentBackground)
+
         self.btn_close = QPushButton(load_icon("close"), '')
         self.btn_close.clicked.connect(self.hide)
+
         self.color_background = QColor(128, 128, 128, 0.8 * 255)
         self.result = ResultWindow(self, True)
         self.result.setAttribute(Qt.WA_TranslucentBackground)
+
         vbox = QVBoxLayout()
-        vbox.addItem(create_line([self.label_src, 1, self.btn_close]))
+        vbox.addItem(create_line([self.label_src, 1, create_multi_line([self.btn_close, 1])]))
         vbox.addWidget(self.result)
         self.setLayout(vbox)
         self.timer_hide = QTimer()
@@ -58,6 +74,21 @@ class TipWindow(BaseWidget):
         self.curr_hotkey = []
         self.hotkey = SystemHotkey()
         self.on_setting_changed()
+
+    def mouseMoveEvent(self, e: QMouseEvent):  # 重写移动事件
+        self._endPos = e.pos() - self._startPos
+        self.move(self.pos() + self._endPos)
+
+    def mousePressEvent(self, e: QMouseEvent):
+        if e.button() == Qt.LeftButton:
+            self._isTracking = True
+            self._startPos = QPoint(e.x(), e.y())
+
+    def mouseReleaseEvent(self, e: QMouseEvent):
+        if e.button() == Qt.LeftButton:
+            self._isTracking = False
+            self._startPos = None
+            self._endPos = None
 
     def on_setting_changed(self):
         if setting.support_clipboard:
@@ -126,16 +157,12 @@ class TipWindow(BaseWidget):
     def query(self, txt):
         if txt is None or txt == '':
             return False
-        is_word, result = self.youdao.translate(txt)
-        # print("youdao: ", is_word, result)
-        if is_word:
-            succeed = self.result.show_word_result(result)
-            self.label_src.setText(txt)
-            self.label_src.show()
-        else:
-            succeed = self.result.show_text_result(result)
-            self.label_src.hide()
+        self.src = txt
+        self.result.reset(txt)
+        self.label_src.setText(txt)
+        self.online.translate(txt, setting.dicts_for_clipboard)
         res = self.star_dict.translate_word(txt)
+        succeed = False
         for k in res.keys():
             if res[k] == '':
                 continue
@@ -162,6 +189,8 @@ class TipWindow(BaseWidget):
         self.hide()
 
     def show(self):
+        if self.isVisible():
+            return
         if setting.use_dark_skin:
             self.color_background = QColor(50, 50, 50, 0.8*255)
         else:
@@ -169,3 +198,7 @@ class TipWindow(BaseWidget):
         self.move(QCursor.pos())
         self.timer_hide.start(3000)
         super().show()
+
+    def on_translate_finish(self, src, result):
+        if src == self.src:
+            self.show()

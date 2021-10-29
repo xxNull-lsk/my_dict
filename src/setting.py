@@ -16,7 +16,15 @@ class Setting:
     show_main_window_when_startup = True
     use_dark_skin = True
     dicts_for_query = ["*"]
-    dicts_for_clipboard = []
+    dicts_for_clipboard = ["google"]
+    online = {
+        "youdao": {
+            "name": "有道翻译"
+        },
+        "google": {
+            "name": "谷歌翻译"
+        }
+    }
 
     def __init__(self):
         self.load()
