@@ -13,6 +13,7 @@ class Setting:
     support_ocr = True
     ocr_hotkey = ['control', 'alt', 'd']
     ocr_server = "tcp://127.0.0.1:12126"
+    word_book = "{}/word_book.db".format(setting_folder)
     show_main_window_when_startup = True
     use_dark_skin = True
     dicts_for_query = ["*"]

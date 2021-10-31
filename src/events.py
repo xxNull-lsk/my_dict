@@ -8,5 +8,8 @@ class Events(QObject):
     # 在线翻译结束：源字符串，翻译结果
     signal_translate_finish = pyqtSignal(str, dict)
 
+    # 添加单词到生词本: 单词，翻译
+    signal_add_2_wordbook = pyqtSignal(str, str)
+
 
 events = Events()

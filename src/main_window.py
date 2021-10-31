@@ -2,6 +2,7 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget
 from qdarkstyle import LightPalette
 
+from src.UI.word_book import WordBook
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
 from src.events import events
@@ -38,6 +39,7 @@ class MainWindow(QWidget):
         self.tab = QTabWidget()
         self.tab.addTab(FindWord(self.online, self.star_dict, self), '词典')
         self.tab.addTab(FindText(self.online, self), '翻译')
+        self.tab.addTab(WordBook(self), '生词本')
         self.tab.addTab(SettingWindow(self, self.star_dict), '设置')
         self.tab.tabBar().setMinimumWidth(200)
         self.tab.tabBar().setTabIcon(0, load_icon("word"))
