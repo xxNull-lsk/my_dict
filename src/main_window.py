@@ -2,6 +2,7 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget
 from qdarkstyle import LightPalette
 
+from src.UI.util import create_line
 from src.UI.word_book import WordBook
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
@@ -46,9 +47,7 @@ class MainWindow(QWidget):
         self.tab.tabBar().setTabIcon(1, load_icon("text"))
         self.tab.tabBar().setTabIcon(2, load_icon("setting"))
 
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.tab)
-        self.setLayout(hbox)
+        self.setLayout(create_line([self.tab]))
 
         self.center()
 

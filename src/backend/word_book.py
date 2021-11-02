@@ -21,7 +21,6 @@ class WordBook:
         c.execute('''CREATE TABLE IF NOT EXISTS groups
                (id INTEGER PRIMARY KEY  AUTOINCREMENT   NOT NULL,
                name            TEXT    UNIQUE NOT NULL,
-               note            TEXT,
                dt_create          TEXT    NOT NULL);''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS groups_info
@@ -29,7 +28,7 @@ class WordBook:
                 group_id      INTEGER   NOT NULL);''')
         self.conn.commit()
 
-        self.create_group("未分类", "")
+        self.create_group("未分类")
 
     def add_word(self, word: str, translate: str):
         c = self.conn.cursor()
@@ -44,12 +43,12 @@ class WordBook:
             print(ex)
             return False
 
-    def create_group(self, name: str, note: str):
+    def create_group(self, name: str):
         c = self.conn.cursor()
         try:
             c.execute(
-                '''INSERT INTO groups (name, note, dt_create) VALUES (?, ?, ?);''',
-                (name, note, datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S"))
+                '''INSERT INTO groups (name, dt_create) VALUES (?, ?);''',
+                (name, datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S"))
             )
             self.conn.commit()
             return True
@@ -75,11 +74,11 @@ class WordBook:
         try:
             if row < 0:
                 result = c.execute(
-                    '''SELECT id, name, note, dt_create FROM groups;'''
+                    '''SELECT id, name, dt_create FROM groups;'''
                 )
             else:
                 result = c.execute(
-                    '''SELECT id, name, note, dt_create FROM groups LIMIT ? OFFSET ?;''',
+                    '''SELECT id, name, dt_create FROM groups LIMIT ? OFFSET ?;''',
                     (count, row)
                 )
             for item in result.fetchall():
