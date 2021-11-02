@@ -2,8 +2,10 @@ import json
 
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtWidgets import QWidget, QLabel, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QWidget, QLabel, QTextEdit, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QDialog, \
+    QLineEdit
 
+from src.UI.util import create_line, create_multi_line
 from src.events import events
 from src.util import load_icon
 from src.backend.youdao import YouDaoFanYi
@@ -11,6 +13,7 @@ from src.backend.youdao import YouDaoFanYi
 
 class ResultWindow(QWidget):
     src = ""
+    translates = []
     online_results = []
     css = '<style type="text/css">\n' \
           'div.title {\n' \
@@ -46,6 +49,12 @@ class ResultWindow(QWidget):
         self.btn_uk.setFlat(True)
         self.btn_uk.clicked.connect(lambda: self.on_play(self.media_player_uk))
 
+        self.btn_add_2_wordbook = QPushButton("添加")
+        self.btn_add_2_wordbook.setFlat(True)
+        self.btn_add_2_wordbook.setIcon(load_icon("wordbook"))
+        self.btn_add_2_wordbook.clicked.connect(self.on_add_2_wordbook)
+        self.btn_add_2_wordbook.hide()
+
         hbox = QHBoxLayout()
         hbox.setSpacing(8)
         hbox.addWidget(self.label_uksm)
@@ -53,6 +62,7 @@ class ResultWindow(QWidget):
         hbox.addWidget(self.label_ussm)
         hbox.addWidget(self.btn_us)
         hbox.addStretch(1)
+        hbox.addWidget(self.btn_add_2_wordbook)
 
         vbox = QVBoxLayout()
         vbox.addItem(hbox)
@@ -65,7 +75,6 @@ class ResultWindow(QWidget):
             for i in range(0, hbox.count()):
                 w = hbox.itemAt(i)
                 if isinstance(w, QWidget):
-                    print(i, "Qt.WA_TranslucentBackground")
                     w.setAttribute(Qt.WA_TranslucentBackground)
         self.setLayout(vbox)
 
@@ -79,12 +88,14 @@ class ResultWindow(QWidget):
 
     def reset(self, src):
         self.src = src
+        self.translates = []
         self.online_results = []
         self.btn_uk.hide()
         self.label_uksm.hide()
         self.btn_us.hide()
         self.label_ussm.hide()
         self.edit_res.clear()
+        self.btn_add_2_wordbook.hide()
 
     def on_translate_finish(self, src, result):
         if self.src != src:
@@ -99,6 +110,7 @@ class ResultWindow(QWidget):
             self._add_online_word_result(result)
         else:
             self._add_online_text_result(result)
+        self.btn_add_2_wordbook.show()
 
     def _add_online_text_result(self, result):
         if "error_code" in result and result["error_code"] != 0:
@@ -106,12 +118,13 @@ class ResultWindow(QWidget):
             events.signal_pop_message.emit("查询失败")
             return False
         res = ''
-        for target in result["target"]:
+        for index, target in enumerate(result["target"]):
             if res != '':
                 res += "<br>"
             res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(
                 self.plan2html(target)
             )
+            self.translates.insert(index, self.html2plan(target))
         res = self.css + "<div class=\"title\">{}</div><p>".format(result["server"]) + res + "</p>"
         html = self.edit_res.toHtml()
         self.edit_res.setHtml("{}{}".format(res, html))
@@ -121,12 +134,14 @@ class ResultWindow(QWidget):
         if result['error_code'] != 0:
             return False
         res = ''
-        for item in result["target"]:
+        for index, target in enumerate(result["target"]):
             if res != '':
                 res += "<br>"
             res += "&nbsp;&nbsp;&nbsp;&nbsp;{}".format(
-                self.plan2html(item)
+                self.plan2html(target)
             )
+            self.translates.insert(index, self.html2plan(target))
+            index += 1
         res = self.css + "<div class=\"title\">{}</div><p>".format(result["server"]) + res + "</p>"
 
         if 'uk' in result:
@@ -158,6 +173,15 @@ class ResultWindow(QWidget):
         return True
 
     @staticmethod
+    def html2plan(v: str):
+        if "<br>" in v or '<br/>' in v:
+            v = v.replace('<br>', '\n')
+            v = v.replace('<br/>', '\n')
+            v = v.replace('&nbsp;&nbsp;&nbsp;&nbsp;', '\t')
+            v = v.replace('&nbsp;', ' ')
+        return v
+
+    @staticmethod
     def plan2html(v: str):
         if "<br>" not in v and '<br/>' not in v:
             v = v.replace('\n', '<br>')
@@ -176,3 +200,33 @@ class ResultWindow(QWidget):
         self.edit_res.setHtml("{}"
                               "<div class=\"title\">{}</div>"
                               "<p>{}</p>".format(html, k, v))
+        self.translates.append(self.html2plan(v))
+        self.btn_add_2_wordbook.show()
+
+    def on_add_2_wordbook(self):
+        d = UiEditWord(self, self.src, "\r\n".join(self.translates))
+        if d.exec_() == 1:
+            events.signal_add_2_wordbook.emit(d.edit_word.text(), d.edit_translate.toPlainText())
+
+
+class UiEditWord(QDialog):
+    def __init__(self, parent, word, translate):
+        super().__init__(parent)
+        self.edit_word = QLineEdit(word)
+        self.edit_translate = QTextEdit()
+        self.edit_translate.setAcceptRichText(False)
+        self.edit_translate.setPlainText(translate)
+
+        self.btn_ok = QPushButton("  确定  ")
+        self.btn_ok.clicked.connect(self.accept)
+        self.btn_cancel = QPushButton("  取消  ")
+        self.btn_cancel.clicked.connect(self.reject)
+
+        layout = create_multi_line([
+            create_line(["单词:", self.edit_word]),
+            "翻译",
+            self.edit_translate,
+            create_line([1, self.btn_ok, self.btn_cancel, 1]),
+        ])
+        self.setLayout(layout)
+

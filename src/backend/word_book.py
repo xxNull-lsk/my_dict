@@ -38,10 +38,10 @@ class WordBook:
                 (word, translate, datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S"), 0)
             )
             self.conn.commit()
-            return True
+            return c.lastrowid
         except Exception as ex:
             print(ex)
-            return False
+            return -1
 
     def create_group(self, name: str):
         c = self.conn.cursor()
@@ -51,10 +51,10 @@ class WordBook:
                 (name, datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S"))
             )
             self.conn.commit()
-            return True
+            return c.lastrowid
         except Exception as ex:
             print(ex)
-            return False
+            return -1
 
     def add_word_to_group(self, word_id: int, group_id: int):
         c = self.conn.cursor()
@@ -69,7 +69,7 @@ class WordBook:
             print(ex)
             return False
 
-    def get_groups(self, callback, row=-1, count=-1):
+    def get_groups(self, row=-1, count=-1) -> list:
         c = self.conn.cursor()
         try:
             if row < 0:
@@ -81,30 +81,31 @@ class WordBook:
                     '''SELECT id, name, dt_create FROM groups LIMIT ? OFFSET ?;''',
                     (count, row)
                 )
-            for item in result.fetchall():
-                if not callback(item):
-                    break
-            return True
+            return result.fetchall()
         except Exception as ex:
             print(ex)
-            return False
+            return []
 
-    def get_words(self, callback, group_id: int, row, count):
+    def get_words(self, group_id: int, row=-1, count=-1) -> list:
         c = self.conn.cursor()
         try:
-            result = c.execute(
-                '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
-                    (SELECT word_id FROM groups_info WHERE group_id=?)
-                  LIMIT ? OFFSET ?;''',
-                (group_id, count, row)
-            )
-            for item in result.fetchall():
-                if not callback(item):
-                    break
-            return True
+            if row < 0:
+                result = c.execute(
+                    '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
+                        (SELECT word_id FROM groups_info WHERE group_id=?);''',
+                    (group_id, )
+                )
+            else:
+                result = c.execute(
+                    '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
+                        (SELECT word_id FROM groups_info WHERE group_id=?)
+                      LIMIT ? OFFSET ?;''',
+                    (group_id, count, row)
+                )
+            return result.fetchall()
         except Exception as ex:
             print(ex)
-            return False
+            return []
 
     def change_word_translate(self, word_id: int, translate: str):
         c = self.conn.cursor()

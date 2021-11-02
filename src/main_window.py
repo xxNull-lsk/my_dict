@@ -38,14 +38,15 @@ class MainWindow(QWidget):
         self.tip_window.hide()
 
         self.tab = QTabWidget()
-        self.tab.addTab(FindWord(self.online, self.star_dict, self), '词典')
-        self.tab.addTab(FindText(self.online, self), '翻译')
-        self.tab.addTab(WordBook(self), '生词本')
-        self.tab.addTab(SettingWindow(self, self.star_dict), '设置')
+        self.tab.addTab(FindWord(self.online, self.star_dict, self), '  词典  ')
+        self.tab.addTab(FindText(self.online, self), '  翻译  ')
+        self.tab.addTab(WordBook(self), '  生词本  ')
+        self.tab.addTab(SettingWindow(self, self.star_dict), '  设置  ')
         self.tab.tabBar().setMinimumWidth(200)
         self.tab.tabBar().setTabIcon(0, load_icon("word"))
         self.tab.tabBar().setTabIcon(1, load_icon("text"))
-        self.tab.tabBar().setTabIcon(2, load_icon("setting"))
+        self.tab.tabBar().setTabIcon(2, load_icon("wordbook"))
+        self.tab.tabBar().setTabIcon(3, load_icon("setting"))
 
         self.setLayout(create_line([self.tab]))
 
@@ -55,11 +56,13 @@ class MainWindow(QWidget):
         import qdarkstyle
         if setting.use_dark_skin:
             dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
+            dark_stylesheet = dark_stylesheet.replace('QComboBox::item:checked', "XQComboBox::item:checked")
+            dark_stylesheet = dark_stylesheet.replace('QComboBox::indicator', "XQComboBox::indicator")
             self.app.setStyleSheet(dark_stylesheet)
         else:
-            style = qdarkstyle.load_stylesheet(palette=LightPalette)
-            self.app.setStyleSheet(style)
-            # self.app.setStyleSheet("")
+            # style = qdarkstyle.load_stylesheet(palette=LightPalette)
+            # self.app.setStyleSheet(style)
+            self.app.setStyleSheet("")
 
     def center(self):
         rect = self.frameGeometry()
