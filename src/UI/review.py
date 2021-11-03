@@ -2,10 +2,10 @@ import random
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QDialog, QCheckBox, QPushButton, QLabel, QMessageBox, QTextEdit
+from PyQt5.QtWidgets import QDialog, QCheckBox, QPushButton, QMessageBox, QTextEdit
 
 from src.UI.util import create_line, create_multi_line
-from src.backend.word_book import word_book
+from src.backend.word_book import WordBook
 
 
 class UiReview(QDialog):
@@ -13,9 +13,10 @@ class UiReview(QDialog):
     current = -1
     right_index = -1
 
-    def __init__(self, parent, group_id):
+    def __init__(self, parent, group_id, word_book: WordBook):
         super().__init__(parent)
         self.setWindowTitle("复习生词")
+        self.word_book = word_book
         for word in word_book.get_words(group_id, for_review=True):
             self.words.append({
                 "id": word[0],
@@ -73,7 +74,7 @@ class UiReview(QDialog):
                     if self.words[-1] != curr:
                         self.words.append(curr)
                     return
-            word_book.review_word(curr["id"], curr["review_count"] + 1)
+            self.word_book.review_word(curr["id"], curr["review_count"] + 1)
 
         self.current += 1
         if self.current == len(self.words) - 1:

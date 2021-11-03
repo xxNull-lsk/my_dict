@@ -200,10 +200,12 @@ class WordBook:
             return []
 
 
-word_book = None
+_word_book: WordBook = None
 
 
-def init():
-    global word_book
-    word_book = WordBook()
+def get_word_book():
+    global _word_book
+    if _word_book is None:
+        _word_book = WordBook()
+    return _word_book
 

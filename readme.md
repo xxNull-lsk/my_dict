@@ -36,6 +36,12 @@
 
 ![下载词典](readme.assets/download.png)
 
+# 生词本
+
+![wordbook](readme.assets/wordbook.png)
+
+![review](readme.assets/review.png)
+
 # 支持的系统
 
 - UOS 社区版 20.2.4

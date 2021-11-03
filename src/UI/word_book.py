@@ -4,16 +4,15 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QCheckBox, QTableWi
 
 from src.UI.review import UiReview
 from src.UI.util import create_line, create_multi_line
-from src.backend.word_book import word_book
+from src.backend.word_book import WordBook
 from src.events import events
 
 
 class UiSelectGroup(QDialog):
     group_id = -1
 
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, parent, word_book):
+        super().__init__(parent)
         self.combo_groups = QComboBox()
         self.combo_groups.clear()
         for group in word_book.get_groups():
@@ -32,16 +31,16 @@ class UiSelectGroup(QDialog):
 
     def on_ok(self):
         self.group_id = self.combo_groups.currentData()
-        print("dest group_id", self.group_id)
         self.accept()
 
 
-class WordBook(QWidget):
+class UiWordBook(QWidget):
     groups = {}
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
+        self.word_book = WordBook()
         events.signal_add_2_wordbook.connect(self.on_add_word)
 
         self.combo_groups = QComboBox()
@@ -94,7 +93,7 @@ class WordBook(QWidget):
     def init_groups(self):
         self.combo_groups.clear()
         self.groups.clear()
-        groups = word_book.get_groups()
+        groups = self.word_book.get_groups()
         for group in groups:
             self.groups[group[0]] = group[1]
         self.combo_groups.addItem("所有分类", -1)
@@ -113,10 +112,10 @@ class WordBook(QWidget):
             return
         for i in range(self.table.rowCount()):
             self.table.removeRow(0)
-        for word in word_book.get_words(self.combo_groups.currentData()):
+        for word in self.word_book.get_words(self.combo_groups.currentData()):
             self.table.insertRow(0)
             word_id = word[0]
-            group_id = word_book.get_group(word_id)
+            group_id = self.word_book.get_group(word_id)
             if len(group_id) > 0:
                 group_id = group_id[0][0]
             else:
@@ -144,22 +143,22 @@ class WordBook(QWidget):
         name, succeed = QInputDialog.getText(self, "新增分类", "分类名称")
         if name is None or not succeed:
             return
-        word_book.create_group(name)
+        self.word_book.create_group(name)
         self.init_groups()
 
     def on_delete_group(self):
         if self.combo_groups.currentIndex() < 0:
             return
-        word_book.delete_group(self.combo_groups.currentData())
+        self.word_book.delete_group(self.combo_groups.currentData())
         self.init_groups()
 
     def on_add_word(self, word, translate):
-        word_id = word_book.add_word(word, translate)
-        word_book.add_word_to_group(word_id, 1)
+        word_id = self.word_book.add_word(word, translate)
+        self.word_book.add_word_to_group(word_id, 1)
         self.init_groups()
 
     def on_change_group(self):
-        d = UiSelectGroup()
+        d = UiSelectGroup(self, self.word_book)
         if d.exec_() != 1:
             return
 
@@ -169,8 +168,8 @@ class WordBook(QWidget):
                 continue
             word_id = item.data(Qt.UserRole)
             group_id = item.data(Qt.UserRole + 1)
-            word_book.add_word_to_group(word_id, d.group_id)
-            word_book.delete_word_from_group(word_id, group_id)
+            self.word_book.add_word_to_group(word_id, d.group_id)
+            self.word_book.delete_word_from_group(word_id, group_id)
 
         self.init_words()
 
@@ -180,7 +179,7 @@ class WordBook(QWidget):
             item = self.table.item(i, 0)
             if item.checkState() != Qt.Checked:
                 continue
-            word_book.delete_word(item.data(Qt.UserRole))
+            self.word_book.delete_word(item.data(Qt.UserRole))
             self.table.removeRow(i)
 
     def on_double_clicked(self, item: QTableWidgetItem):
@@ -188,6 +187,6 @@ class WordBook(QWidget):
         item.setCheckState(Qt.Checked if item.checkState() != Qt.Checked else Qt.Unchecked)
 
     def on_review(self):
-        d = UiReview(self, self.combo_groups.currentData())
+        d = UiReview(self, self.combo_groups.currentData(), self.word_book)
         d.exec_()
         self.init_words()
