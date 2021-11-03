@@ -1,9 +1,9 @@
 from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDesktopWidget, QTabWidget
-from qdarkstyle import LightPalette
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QTabWidget
 
 from src.UI.util import create_line
 from src.UI.word_book import WordBook
+from src.backend import word_book
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
 from src.events import events
@@ -21,6 +21,7 @@ class MainWindow(QWidget):
 
     def __init__(self, app):
         super().__init__()
+        word_book.init()
         self.app = app
         self.on_setting_changed()
         events.signal_setting_changed.connect(self.on_setting_changed)

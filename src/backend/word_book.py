@@ -200,5 +200,10 @@ class WordBook:
             return []
 
 
-word_book = WordBook()
+word_book = None
+
+
+def init():
+    global word_book
+    word_book = WordBook()
 
