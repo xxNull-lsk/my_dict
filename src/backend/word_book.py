@@ -86,22 +86,26 @@ class WordBook:
             print(ex)
             return []
 
-    def get_words(self, group_id: int, row=-1, count=-1) -> list:
+    def get_words(self, group_id: int, row=-1, count=-1, for_review=False) -> list:
         c = self.conn.cursor()
         where = 'WHERE group_id={}'.format(group_id)
         if group_id is None or group_id < 0:
             where = ''
+        if for_review:
+            order = " ORDER BY review_count"
+        else:
+            order = ""
         try:
             if row < 0:
                 result = c.execute(
                     '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
-                        (SELECT word_id FROM groups_info {});'''.format(where)
+                        (SELECT word_id FROM groups_info {}) {};'''.format(where, order)
                 )
             else:
                 result = c.execute(
                     '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
                         (SELECT word_id FROM groups_info {})
-                      LIMIT ? OFFSET ?;'''.format(where),
+                      LIMIT ? OFFSET ? {};'''.format(where, order),
                     (count, row)
                 )
             return result.fetchall()
@@ -182,6 +186,19 @@ class WordBook:
             print(ex)
             return False
 
+    def get_group(self, word_id: int):
+        c = self.conn.cursor()
+        try:
+            result = c.execute(
+                '''SELECT group_id FROM groups_info WHERE word_id=?;''',
+                (word_id, )
+            )
+            self.conn.commit()
+            return result.fetchall()
+        except Exception as ex:
+            print(ex)
+            return []
 
-work_book = WordBook()
+
+word_book = WordBook()
 

@@ -1,11 +1,11 @@
 from PyQt5.QtCore import QRect, QTimer, Qt, QSize, pyqtSignal, QPoint
 from PyQt5.QtGui import QCursor, QFont, QColor, QMouseEvent
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QWidget, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QPushButton
 from system_hotkey import SystemHotkey
 
 from src.UI.BaseWidget import BaseWidget
-from src.UI.OCR import OCR
+from src.backend.ocr import OCR
 from src.UI.result import ResultWindow
 from src.UI.util import create_line, create_multi_line
 from src.backend.online import OnLine
