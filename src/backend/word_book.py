@@ -88,19 +88,21 @@ class WordBook:
 
     def get_words(self, group_id: int, row=-1, count=-1) -> list:
         c = self.conn.cursor()
+        where = 'WHERE group_id={}'.format(group_id)
+        if group_id is None or group_id < 0:
+            where = ''
         try:
             if row < 0:
                 result = c.execute(
                     '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
-                        (SELECT word_id FROM groups_info WHERE group_id=?);''',
-                    (group_id, )
+                        (SELECT word_id FROM groups_info {});'''.format(where)
                 )
             else:
                 result = c.execute(
                     '''SELECT id, word, translate, dt_create, review_count FROM words WHERE id in
-                        (SELECT word_id FROM groups_info WHERE group_id=?)
-                      LIMIT ? OFFSET ?;''',
-                    (group_id, count, row)
+                        (SELECT word_id FROM groups_info {})
+                      LIMIT ? OFFSET ?;'''.format(where),
+                    (count, row)
                 )
             return result.fetchall()
         except Exception as ex:
