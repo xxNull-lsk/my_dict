@@ -72,7 +72,7 @@ class TipWindow(BaseWidget):
         self.timer_hide.timeout.connect(self.on_auto_hide)
 
         self.curr_hotkey = []
-        self.hotkey = SystemHotkey()
+        self.hotkey = SystemHotkey(check_queue_interval=0.01)
         self.on_setting_changed()
 
     def mouseMoveEvent(self, e: QMouseEvent):  # 重写移动事件

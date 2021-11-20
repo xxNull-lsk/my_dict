@@ -1,10 +1,11 @@
-from PyQt5.QtCore import QRect
+from PyQt5.QtCore import QRect, QTimer
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QTabWidget
 
 from src.UI.util import create_line
 from src.UI.word_book import UiWordBook
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
+from src.backend.stat import check_newest
 from src.events import events
 from src.setting import setting
 from src.UI.find_text import FindText
@@ -50,6 +51,9 @@ class MainWindow(QWidget):
         self.setLayout(create_line([self.tab]))
 
         self.center()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.on_check_newest)
+        self.timer.start(5000)
 
     def on_setting_changed(self):
         import qdarkstyle
@@ -72,3 +76,14 @@ class MainWindow(QWidget):
     def show(self) -> None:
         super(MainWindow, self).show()
         self.center()
+
+    def on_check_newest(self):
+        self.timer.stop()
+        succeed, new_version = check_newest()
+        if not succeed:
+            return
+        events.signal_pop_message("检测到新版本：\n{}: {}".format(
+            new_version['curr'],
+            new_version['history'][new_version['curr']])
+        )
+        # TODO：执行升级

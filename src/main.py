@@ -1,5 +1,6 @@
 #!/bin/python3
 import fcntl
+import json
 import os
 import sys
 
@@ -25,9 +26,13 @@ def is_running():
 
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] == '-v':
-        print(version["curr"])
-        return
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '-v':
+            print(version["curr"])
+            return
+        elif sys.argv[1] == '-i':
+            print(json.dumps(version))
+            return
     if is_running():
         print("The application is running...")
         return
