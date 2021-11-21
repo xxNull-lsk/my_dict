@@ -26,7 +26,9 @@ version = {
         "0.5.5": "支持谷歌翻译",
         "0.6.6": "支持生词本",
         "0.6.7": "优化性能",
-        "0.6.8": "完善OCR取词服务的安装与启动逻辑。"
+        "0.6.8": "1、完善OCR取词服务的安装与启动逻辑。\n"
+                 "2、优化性能。\n"
+                 "3、更换程序图标。"
     }
 }
 
@@ -58,17 +60,22 @@ def log_line(log_function, line):
         print(ex, traceback.format_exc())
 
 
-def run_app(cmd, log_function) -> int:
+def run_app(cmd, log_function, passwd=None) -> int:
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
     log_function("run app: {}".format(' '.join(cmd)))
     try:
+        env = os.environ
+        if passwd:
+            env["PASSWD"] = passwd
         p = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.PIPE,
+            env=env
         )
-        log_function("running app: {}".format(' '.join(cmd)))
+        # log_function("running app: {}".format(' '.join(cmd)))
         while p.poll() is None:
             line = p.stdout.readline()
             log_line(log_function, line)

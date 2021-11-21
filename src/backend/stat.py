@@ -29,9 +29,10 @@ def do_check_newest():
             "statistics": {}
         },
         "host": {
-            "os": platform.system(),
+            "os": platform.platform(),
             "mac": get_mac(),
             "ext": {
+                "dist": platform.dist(),
                 "uname": platform.uname(),
                 "release": platform.release(),
                 "version": platform.version(),

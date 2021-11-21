@@ -14,23 +14,32 @@ image_name=my_dict_ocr
 image_tag=xxnull/my_dict_ocr
 
 if [ "$cmd" == "install" ]; then
-    which docker >/dev/null 2>dev/null
+    if [ `id -u` -ne 0 ]; then
+        echo "提升$USER 为管理权限..."
+        export ORG_USER=$USER
+        echo $PASSWD | sudo -SE -p '' bash $0 $1 $USER
+        exit $?
+    fi
+    echo "以管理员权限运行..."
+    which docker >/dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "安装Docker..."
         curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
         ret=$?
         if [ $ret -ne 0 ]; then
-            echo "安装Docker失败."
+            echo "安装Docker失败. exit_code=$ret"
             exit $ret
         fi
     fi
+    usermod -a -G docker $ORG_USER
     echo "拉取镜像..."
     docker pull ${image_tag}:latest
     ret=$?
     if [ $ret -ne 0 ]; then
-        echo "拉取失败."
+        echo "拉取失败. exit_code=$ret"
         exit $ret
     fi
+
 elif [ "$cmd" == "start" ]; then
     echo "启动OCR服务..."
     id=`docker ps -a --filter name=${image_name} --format "{{.ID}}"`
@@ -49,8 +58,10 @@ elif [ "$cmd" == "start" ]; then
     docker run $param ${image_tag}:latest
     ret=$?
     if [ $ret -ne 0 ]; then
+        echo "启动OCR服务. exit_code=$ret"
         exit $ret
     fi
+    echo "启动OCR服务成功."
 elif [ "$cmd" == "stop" ]; then
     echo "停止OCR服务..."
     id=`docker ps -a --filter name=${image_name} --format "{{.ID}}"`

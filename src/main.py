@@ -4,7 +4,6 @@ import json
 import os
 import sys
 
-from PyQt5.QtWidgets import QApplication
 from src.util import version
 
 flock = None
@@ -33,6 +32,7 @@ def main():
         print("The application is running...")
         return
     from src.setting import setting
+    from PyQt5.QtWidgets import QApplication
     # os.environ['QT_DEBUG_PLUGINS'] = '1'
     # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)

@@ -5,10 +5,10 @@ import sys
 import threading
 
 import pystardict
-from PyQt5.QtCore import QSize, pyqtSignal, Qt
+from PyQt5.QtCore import QSize, pyqtSignal, Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
-    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel
+    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel, QInputDialog
 
 from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
@@ -57,33 +57,48 @@ class InstallOcrWindow(QDialog):
     signal_log = pyqtSignal(str)
     signal_finish = pyqtSignal(int)
 
-    def __init__(self, parent):
+    def __init__(self, parent, passwd):
         super().__init__(parent)
         self.setWindowTitle("安装OCR服务")
         self.setFixedSize(QSize(640, 480))
         self.edit = QTextEdit()
         self.edit.setAcceptRichText(False)
         self.edit.setReadOnly(True)
-        self.setLayout(create_line([self.edit]))
+
+        self.flag = '.'
+        self.label = QLabel("请耐心等待，正在安装中" + self.flag)
+        self.setLayout(create_multi_line([self.edit, self.label]))
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.on_timeout)
+        self.timer.start(1000)
 
         self.signal_log.connect(self.on_log)
         self.signal_finish.connect(self.on_finish)
-        self.t = threading.Thread(target=self.do_install)
+        self.t = threading.Thread(target=self.do_install, args=(passwd, ))
         self.t.start()
+
+    def on_timeout(self):
+        self.flag += '.'
+        if len(self.flag) > 3:
+            self.flag = ''
+        self.label.setText("请耐心等待，正在安装中" + self.flag)
 
     def on_log(self, txt):
         self.edit.append(txt)
 
     def on_finish(self, ret):
+        self.timer.stop()
         if ret != 0:
+            self.label.setText("安装失败")
             QMessageBox.warning(self, "错误", "安装失败")
             return
-        QMessageBox.information(self, "提示", "安装成功")
-        self.accept()
+        self.label.setText("安装成功，需重启系统或注销重新登录方能生效。")
+        QMessageBox.information(self, "提示", "安装成功，需重启系统或注销重新登录方能生效。")
 
-    def do_install(self):
-        cmd = "bash {} install".format(resource_path("./res/ocr.sh"))
-        ret = run_app(cmd, lambda x: self.signal_log.emit(x))
+    def do_install(self, passwd):
+        cmd = "bash {} install".format(resource_path("res/ocr.sh"))
+        ret = run_app(cmd, lambda x: self.signal_log.emit(x), passwd=passwd)
         self.signal_finish.emit(ret)
 
 
@@ -305,7 +320,14 @@ class SettingWindow(QWidget):
         self.init_dict()
 
     def on_install_ocr_server(self):
-        dd = InstallOcrWindow(self)
+        passwd, succeed = QInputDialog.getText(
+            self,
+            "请输入密码",
+            "安装OCR服务需要管理员权限，\n请输入当前用户密码以提升权限：",
+            QLineEdit.Password)
+        if not succeed or passwd is None or passwd == '':
+            return
+        dd = InstallOcrWindow(self, passwd)
         dd.exec_()
 
     def on_change_hotkey(self):

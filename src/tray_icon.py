@@ -34,7 +34,7 @@ class TrayIcon(QSystemTrayIcon):
         self.menu.addSeparator()
         self.menu.addAction(QAction("退出", parent, triggered=self.on_quit))
         self.setContextMenu(self.menu)
-        self.ico_dict = QIcon(QPixmap(resource_path("./res/dict.png")))
+        self.ico_dict = QIcon(QPixmap(resource_path("./res/dict_64x64.png")))
         self.setIcon(self.ico_dict)
         self.activated.connect(self.on_activated)
         self.setToolTip("我的词典 {}".format(version["curr"]))
