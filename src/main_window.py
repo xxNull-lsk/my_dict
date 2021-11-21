@@ -24,6 +24,7 @@ class MainWindow(QWidget):
         self.app = app
         self.on_setting_changed()
         events.signal_setting_changed.connect(self.on_setting_changed)
+        events.signal_check_newest.connect(self.on_check_newest)
 
         self.setGeometry(QRect(0, 0, 800, 600))
         self.tray = TrayIcon(self)
@@ -51,9 +52,7 @@ class MainWindow(QWidget):
         self.setLayout(create_line([self.tab]))
 
         self.center()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.on_check_newest)
-        self.timer.start(5000)
+        check_newest()
 
     def on_setting_changed(self):
         import qdarkstyle
@@ -77,11 +76,8 @@ class MainWindow(QWidget):
         super(MainWindow, self).show()
         self.center()
 
-    def on_check_newest(self):
-        self.timer.stop()
-        succeed, new_version = check_newest()
-        if not succeed:
-            return
+    @staticmethod
+    def on_check_newest(new_version):
         events.signal_pop_message("检测到新版本：\n{}: {}".format(
             new_version['curr'],
             new_version['history'][new_version['curr']])

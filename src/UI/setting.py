@@ -14,7 +14,7 @@ from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
 from src.backend.stardict import StartDict
 from src.setting import setting
-from src.util import run_app
+from src.util import run_app, resource_path
 
 
 class GetHotkey(QDialog):
@@ -82,7 +82,7 @@ class InstallOcrWindow(QDialog):
         self.accept()
 
     def do_install(self):
-        cmd = "docker pull xxnull/my_dict_ocr:latest"
+        cmd = "bash {} install".format(resource_path("./res/ocr.sh"))
         ret = run_app(cmd, lambda x: self.signal_log.emit(x))
         self.signal_finish.emit(ret)
 

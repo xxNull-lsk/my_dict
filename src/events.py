@@ -11,5 +11,7 @@ class Events(QObject):
     # 添加单词到生词本: 单词，翻译
     signal_add_2_wordbook = pyqtSignal(str, str)
 
+    signal_check_newest = pyqtSignal(dict)
+
 
 events = Events()

@@ -8,7 +8,7 @@ import numpy as np
 
 from src.UI.ocr_mask import UiOcrMask
 from src.setting import setting
-from src.util import run_app
+from src.util import run_app, resource_path
 import threading
 
 
@@ -22,9 +22,13 @@ class OcrServer:
         self.t = threading.Thread(target=self.start_local_server)
         self.t.start()
 
+    def __del__(self):
+        cmd = "bash {} stop".format(resource_path("./res/ocr.sh"))
+        run_app(cmd, print)
+
     @staticmethod
     def start_local_server():
-        cmd = "docker run -itd --name my_dict_ocr -p 12126:12126 xxnull/my_dict_ocr:latest"
+        cmd = "bash {} start".format(resource_path("./res/ocr.sh"))
         run_app(cmd, print)
 
     def get_english(self, mat):

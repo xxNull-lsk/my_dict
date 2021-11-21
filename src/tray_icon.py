@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QDialog, QLabel
 
 from src.UI.util import create_form, create_multi_line, create_line
 from src.events import events
-from src.util import resource_path, version
+from src.util import resource_path, version, run_app
 
 
 class About(QDialog):
@@ -42,6 +42,8 @@ class TrayIcon(QSystemTrayIcon):
         events.signal_pop_message.connect(self.pop_message)
 
     def on_quit(self):
+        cmd = "bash {} stop".format(resource_path("./res/ocr.sh"))
+        run_app(cmd, print)
         self.setVisible(False)
         sys.exit()
 

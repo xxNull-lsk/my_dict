@@ -1,8 +1,10 @@
 import json
 import platform
+import threading
 
 import requests
 
+from src.events import events
 from src.util import get_version
 
 
@@ -14,6 +16,11 @@ def get_mac():
 
 
 def check_newest():
+    t = threading.Thread(target=do_check_newest)
+    t.start()
+
+
+def do_check_newest():
     data = {
         "app": {
             "name": "my_dict",
@@ -37,11 +44,11 @@ def check_newest():
 
     try:
         response = requests.post("http://home.mydata.top:8681/api/my_dict/check_newest", data=json.dumps(data))
-        print(response.text)
+        print("check_newest: ", response.text)
         res = response.json()
         if res["result"]["code"] != 0 or "new_version" not in res:
-            return False, None
+            return
         new_version = res["info"]
-        return True, new_version
+        events.signal_check_newest(new_version)
     except:
-        return False, None
+        return
