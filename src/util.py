@@ -7,7 +7,7 @@ import traceback
 from PyQt5.QtGui import QIcon, QPixmap
 
 version = {
-    "curr": "0.6.8",
+    "curr": "0.6.9",
     "history": {
         "0.0.1": "实现基本功能:\n"
                  "  1、查词界面\n"
@@ -28,7 +28,10 @@ version = {
         "0.6.7": "优化性能",
         "0.6.8": "1、完善OCR取词服务的安装与启动逻辑。\n"
                  "2、优化性能。\n"
-                 "3、更换程序图标。"
+                 "3、更换程序图标。",
+        "0.6.9": "1、优化设置界面。\n"
+                 "2、解决Ubuntu系统中的兼容问题。\n"
+                 "3、优化OCR取词，提升成功概率。\n"
     }
 }
 
@@ -60,7 +63,7 @@ def log_line(log_function, line):
         print(ex, traceback.format_exc())
 
 
-def run_app(cmd, log_function, passwd=None) -> int:
+def run_app(cmd, log_function=print, passwd=None) -> int:
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
     log_function("run app: {}".format(' '.join(cmd)))

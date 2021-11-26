@@ -103,6 +103,7 @@ class InstallOcrWindow(QDialog):
 
 
 class SettingWindow(QWidget):
+    signal_check_install = pyqtSignal(int)
     auto_startup_filename = "{}/.config/autostart/my_dict.desktop".format(os.environ["HOME"])
     cfg_desktop = "[Desktop Entry]\n" \
                   "Categories=Education;Translation\n" \
@@ -196,6 +197,22 @@ class SettingWindow(QWidget):
         ]
 
         self.setLayout(create_multi_line([create_grid(items), 1]))
+        self.signal_check_install.connect(self.on_check_install)
+        self.t = threading.Thread(target=self.do_check_install_ocr)
+        self.t.start()
+
+    def on_check_install(self, ret):
+        if ret == 0:
+            self.button_ocr_server.setText("更新/重装")
+            self.button_ocr_server.setToolTip("已经安装，点击更新OCR服务器")
+        else:
+            self.button_ocr_server.setText("安装")
+            self.button_ocr_server.setToolTip("点击安装OCR服务器")
+
+    def do_check_install_ocr(self):
+        cmd = "bash {} check_install".format(resource_path("res/ocr.sh"))
+        ret = run_app(cmd)
+        self.signal_check_install.emit(ret)
 
     def init_dict(self):
         self.list_query_dicts.clear()

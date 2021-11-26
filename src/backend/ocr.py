@@ -57,6 +57,8 @@ class OcrServer(QObject):
             response = self.socket.recv_string()
             return json.loads(response)
         except Exception as ex:
+            print("Exception: ", ex)
+            self.on_start_finish(0)
             return {
                 "code": -1,
                 "message": str(ex)
@@ -81,12 +83,11 @@ class OCR:
     def get_text(self):
         mask = UiOcrMask(self.app.desktop().winId(), self.app.primaryScreen())
         if mask.exec_() == 0 or mask.select_image.isNull():
-            return ''
+            return False, ''
         mat = self.img_to_mat(mask.select_image)
         result = self.server.get_english(mat)
-        print("result", result)
         if result["code"] != 0:
-            return ''
+            return False, result["message"]
         if len(result["data"]) > 0:
-            return result["data"][0]["text"]
-        return ''
+            return True, result["data"][0]["text"]
+        return False, "无法识别。"

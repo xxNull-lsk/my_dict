@@ -112,10 +112,11 @@ class TipWindow(BaseWidget):
         if self.is_in_hotkey:
             return
         self.is_in_hotkey = True
-        txt = self.ocr.get_text()
+        res, txt = self.ocr.get_text()
         self.is_in_hotkey = False
-        if txt == '':
-            events.signal_pop_message.emit("OCR取词失败。")
+        if not res:
+            if txt != '':
+                events.signal_pop_message.emit("OCR取词失败。{}".format(txt))
             return
         if not self.query(txt):
             print("query failed!")
