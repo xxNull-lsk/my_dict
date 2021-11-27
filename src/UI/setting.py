@@ -174,7 +174,9 @@ class SettingWindow(QWidget):
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
         self.checkbox_support_ocr.setChecked(setting.support_ocr)
         self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
-        self.checkbox_auto_startup.setChecked(self.is_auto_startup())
+        self.checkbox_auto_startup.setChecked(setting.auto_start)
+        if setting.auto_start:
+            self.on_auto_startup()
 
         self.list_query_dicts = QListWidget()
         self.list_clipboard_dicts = QListWidget()
@@ -184,14 +186,14 @@ class SettingWindow(QWidget):
             create_multi_line(["取词词典:", self.list_clipboard_dicts])
         ])
         items = [
+            [self.checkbox_auto_startup],
+            [self.checkbox_show_main_window_when_startup],
             [self.checkbox_use_dark_skin],
             [self.checkbox_support_clipboard],
             [self.checkbox_support_ocr],
             ["    取词热键:", create_line([self.edit_ocr_hotkey])],
             ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server])],
-            [self.checkbox_show_main_window_when_startup],
-            [self.checkbox_auto_startup],
-            ["词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
+            ["离线词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
             [line_dicts],
             [create_line([self.btn_create_desktop, self.btn_download_dict])],
         ]
@@ -297,16 +299,12 @@ class SettingWindow(QWidget):
         setting.star_dict_folder = self.edit_dict_folder.text()
         setting.save()
 
-    def is_auto_startup(self):
-        return os.path.exists(self.auto_startup_filename)
-
     def on_auto_startup(self):
+        if os.path.exists(self.auto_startup_filename):
+            os.remove(self.auto_startup_filename)
         if self.checkbox_auto_startup.isChecked():
             with open(self.auto_startup_filename, "w+") as f:
                 f.write(self.cfg_desktop)
-        else:
-            if os.path.exists(self.auto_startup_filename):
-                os.remove(self.auto_startup_filename)
 
     def on_create_desktop(self):
         with open("{}/.local/share/applications/my_dict.desktop".format(os.environ["HOME"]), "w+") as f:
