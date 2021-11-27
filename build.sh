@@ -14,7 +14,8 @@ pyinstaller mydict.spec
 
 version=`./dist/mydict/mydict -v`
 
-rm -rf deb/opt/my_dict/* >/dev/null
+rm -rf deb/opt/my_dict >/dev/null 2>&1
+mkdir -p deb/opt/my_dict >/dev/null
 cp ./LICENSE ./deb/opt/my_dict
 cp -rf dist/mydict/* deb/opt/my_dict/
 sed -i "s/^Version:.*/Version:${version}/g" deb/DEBIAN/control

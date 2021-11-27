@@ -33,7 +33,13 @@
 
 # OCR取词
 
+英文取词：
+
 ![grab.png](readme.assets/grab.png)
+
+汉字取词：
+
+![grab.png](readme.assets/grab1.png)
 
 # 设置界面
 
