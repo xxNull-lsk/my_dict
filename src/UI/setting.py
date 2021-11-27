@@ -198,7 +198,7 @@ class SettingWindow(QWidget):
             [create_line([self.btn_create_desktop, self.btn_download_dict])],
         ]
 
-        self.setLayout(create_multi_line([create_grid(items), 1]))
+        self.setLayout(create_multi_line([create_grid(items)]))
         self.signal_check_install.connect(self.on_check_install)
         self.t = threading.Thread(target=self.do_check_install_ocr)
         self.t.start()
