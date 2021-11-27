@@ -10,8 +10,13 @@ SRC_PATH="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
 cd $SRC_PATH
 
 cmd=$1
+image_version=$2
 image_name=my_dict_ocr
 image_tag=xxnull/my_dict_ocr
+
+if [ "$image_version" == "" ]; then
+    image_version=latest
+fi
 
 function start_server()
 {
@@ -21,15 +26,11 @@ function start_server()
         docker rm -f $id
     fi
 
-    param="-itd"
-    param="$param --ulimit core=0"
-    param="$param -v /etc/localtime:/etc/localtime:ro"
-    param="$param -v /etc/timezone:/etc/timezone:ro"
-    param="$param --restart=always"
+    param="-d"
     param="$param -p 12126:12126"
     param="$param --name ${image_name}"
 
-    docker run $param ${image_tag}:latest
+    docker run $param ${image_tag}:${image_version}
     ret=$?
     if [ $ret -ne 0 ]; then
         echo "启动OCR服务. exit_code=$ret"
@@ -62,14 +63,14 @@ function install_server()
         fi
     fi
     usermod -a -G docker $ORG_USER
-    docker images | grep ${image_tag} | grep latest >/dev/null 2>&1
+    docker images | grep ${image_tag} | grep ${image_version} >/dev/null 2>&1
     if [ $? -ne 0 ]; then
       # 删除已经安装的镜像
       stop_server
-      docker rmi ${image_tag}:latest >/dev/null 2>&2
+      docker rmi ${image_tag}:${image_version} >/dev/null 2>&2
     fi
     echo "拉取镜像..."
-    docker pull ${image_tag}:latest
+    docker pull ${image_tag}:${image_version}
     ret=$?
     if [ $ret -ne 0 ]; then
         echo "拉取失败. exit_code=$ret"

@@ -6,7 +6,7 @@ class Events(QObject):
     signal_setting_changed = pyqtSignal()
 
     # 在线翻译结束：源字符串，翻译结果
-    signal_translate_finish = pyqtSignal(str, dict)
+    signal_translate_finish = pyqtSignal(str, dict, object)
 
     # 添加单词到生词本: 单词，翻译
     signal_add_2_wordbook = pyqtSignal(str, str)

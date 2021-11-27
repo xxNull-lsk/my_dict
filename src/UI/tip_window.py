@@ -112,20 +112,18 @@ class TipWindow(BaseWidget):
         if self.is_in_hotkey:
             return
         self.is_in_hotkey = True
-        res, txt = self.ocr.get_text()
+        res, txt, pos = self.ocr.get_text()
         self.is_in_hotkey = False
         if not res:
-            if txt != '':
-                events.signal_pop_message.emit("OCR取词失败。{}".format(txt))
+            if txt:
+                events.signal_pop_message.emit("OCR取词：{}".format(txt))
             return
-        if not self.query(txt):
-            print("query failed!")
-            return
+        self.query(txt, QPoint(pos[0], pos[1]))
 
     def on_clipboard(self, txt):
         if not self.last_three_is_same(txt):
             return False
-        return self.query(txt)
+        return self.query(txt, QCursor.pos())
 
     @staticmethod
     def on_play(media_player: QMediaPlayer):
@@ -155,13 +153,13 @@ class TipWindow(BaseWidget):
         self.last_text = [txt]
         return False
 
-    def query(self, txt):
+    def query(self, txt, pos):
         if txt is None or txt == '':
             return False
         self.src = txt
         self.result.reset(txt)
         self.label_src.setText(txt)
-        self.online.translate(txt, setting.dicts_for_clipboard)
+        self.online.translate(txt, setting.dicts_for_clipboard, pos)
         res = self.star_dict.translate_word(txt)
         succeed = False
         for k in res.keys():
@@ -175,7 +173,7 @@ class TipWindow(BaseWidget):
                 self.result.add_word_result(k, res[k])
                 succeed = True
         if succeed:
-            self.show()
+            self.show(pos)
         return succeed
 
     def on_auto_hide(self):
@@ -189,17 +187,19 @@ class TipWindow(BaseWidget):
         self.timer_hide.stop()
         self.hide()
 
-    def show(self):
+    def show(self, pos=None):
         if self.isVisible():
             return
         if setting.use_dark_skin:
             self.color_background = QColor(50, 50, 50, 0.8*255)
         else:
             self.color_background = QColor(200, 200, 200, 0.8*255)
-        self.move(QCursor.pos())
+        if pos is None:
+            pos = QCursor.pos()
+        self.move(pos)
         self.timer_hide.start(3000)
         super().show()
 
-    def on_translate_finish(self, src, result):
+    def on_translate_finish(self, src, result, pos):
         if src == self.src:
-            self.show()
+            self.show(pos)
