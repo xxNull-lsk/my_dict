@@ -105,8 +105,10 @@ class TipWindow(BaseWidget):
             if '-'.join(setting.ocr_hotkey) != '-'.join(self.curr_hotkey):
                 if len(self.curr_hotkey) > 0:
                     self.hotkey.unregister(self.curr_hotkey)
-                self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
-                self.curr_hotkey = setting.ocr_hotkey
+                    self.curr_hotkey = []
+                if len(setting.ocr_hotkey) > 0:
+                    self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
+                    self.curr_hotkey = setting.ocr_hotkey
         else:
             if self.ocr:
                 self.hotkey.unregister(self.curr_hotkey)
