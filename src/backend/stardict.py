@@ -11,6 +11,7 @@ class StartDict(QObject):
 
     def __init__(self, folder, in_memory=False):
         super().__init__()
+        os.makedirs(folder, exist_ok=True)
         self.folder = folder
         self.in_memory = in_memory
         # load dict is very slowly, so do it in a thread
@@ -58,7 +59,7 @@ class StartDict(QObject):
             except Exception as err:
                 print(err)
                 return
-            print("load", d.ifo.bookname, "succeed", len(self.dists))
+            print(threading.currentThread().getName(), "load", d.ifo.bookname, "succeed", len(self.dists))
             self.dists.append(d)
 
     def translate_word(self, word):

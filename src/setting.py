@@ -7,7 +7,7 @@ setting_folder = "{}/.config/my_dict".format(os.environ["HOME"])
 setting_filename = "{}/setting.json".format(setting_folder)
 
 
-class Setting:
+class DefaultSetting:
     star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
     support_ocr = True
@@ -28,14 +28,26 @@ class Setting:
         }
     }
 
+
+class Setting:
+
     def __init__(self):
+        self.reset()
         self.load()
+
+    def reset(self):
+        default = DefaultSetting()
+        for k in default.__dir__():
+            if k.startswith('__') or k.startswith("signal_"):
+                continue
+            v = default.__getattribute__(k)
+            if callable(v):
+                continue
+            self.__setattr__(k, v)
 
     def load(self):
         if not os.path.exists(setting_folder):
             os.makedirs(setting_folder)
-        if not os.path.exists(self.star_dict_folder):
-            os.makedirs(self.star_dict_folder)
         txt = ""
         if os.path.exists(setting_filename):
             with open(setting_filename, 'r') as f:

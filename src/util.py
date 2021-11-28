@@ -2,12 +2,13 @@ import os
 import shlex
 import subprocess
 import sys
+import threading
 import traceback
 
 from PyQt5.QtGui import QIcon, QPixmap
 
 version = {
-    "curr": "0.6.9",
+    "curr": "0.6.10",
     "history": {
         "0.0.1": "实现基本功能:\n"
                  "  1、查词界面\n"
@@ -31,7 +32,9 @@ version = {
                  "3、更换程序图标。",
         "0.6.9": "1、优化设置界面。\n"
                  "2、解决Ubuntu系统中的兼容问题。\n"
-                 "3、优化OCR取词，提升成功概率。\n"
+                 "3、优化OCR取词，提升成功概率。\n",
+        "0.6.10": "1、解决上个版本安装OCR服务失败的问题。\n"
+                 "2、优化设置界面。\n"
     }
 }
 
@@ -66,7 +69,7 @@ def log_line(log_function, line):
 def run_app(cmd, log_function=print, passwd=None) -> int:
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
-    log_function("run app: {}".format(' '.join(cmd)))
+    log_function("{} run app: {}".format(threading.currentThread().getName(), ' '.join(cmd)))
     try:
         env = os.environ
         if passwd:
@@ -85,7 +88,7 @@ def run_app(cmd, log_function=print, passwd=None) -> int:
 
         for line in p.stdout.readlines():
             log_line(log_function, line)
-        log_function("running app finish. returncode={}".format(p.returncode))
+        log_function("{} runn app finish. returncode={}".format(threading.currentThread().getName(), p.returncode))
         return p.returncode
     except Exception as ex:
         print(ex)

@@ -10,13 +10,9 @@ SRC_PATH="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
 cd $SRC_PATH
 
 cmd=$1
-image_version=$2
+image_version=latest
 image_name=my_dict_ocr
 image_tag=xxnull/my_dict_ocr
-
-if [ "$image_version" == "" ]; then
-    image_version=latest
-fi
 
 function start_server()
 {

@@ -24,6 +24,7 @@ class TipWindow(BaseWidget):
     _startPos = None
     _endPos = None
     _isTracking = False
+    curr_hotkey = []
 
     def __init__(self, online: OnLine, star_dict: StartDict, app):
         super().__init__()
@@ -71,7 +72,6 @@ class TipWindow(BaseWidget):
         self.timer_hide = QTimer()
         self.timer_hide.timeout.connect(self.on_auto_hide)
 
-        self.curr_hotkey = []
         self.hotkey = SystemHotkey(check_queue_interval=0.01)
         self.on_setting_changed()
 
@@ -96,17 +96,22 @@ class TipWindow(BaseWidget):
                 self.clipboard = QApplication.clipboard()
                 self.clipboard.dataChanged.connect(lambda: self.on_clipboard(self.clipboard.text()))
         else:
-            if self.clipboard is None:
+            if self.clipboard is not None:
                 del self.clipboard
 
-        if self.ocr:
-            self.hotkey.unregister(self.curr_hotkey)
-            del self.ocr
-
-        if setting.support_ocr and len(setting.ocr_hotkey) > 0:
-            self.ocr = OCR(self.app)
-            self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
-            self.curr_hotkey = setting.ocr_hotkey
+        if setting.support_ocr:
+            if self.ocr is None:
+                self.ocr = OCR(self.app)
+            if '-'.join(setting.ocr_hotkey) != '-'.join(self.curr_hotkey):
+                if len(self.curr_hotkey) > 0:
+                    self.hotkey.unregister(self.curr_hotkey)
+                self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
+                self.curr_hotkey = setting.ocr_hotkey
+        else:
+            if self.ocr:
+                self.hotkey.unregister(self.curr_hotkey)
+                self.curr_hotkey = []
+                del self.ocr
 
     def on_hotkey(self):
         if self.is_in_hotkey:

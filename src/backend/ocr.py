@@ -21,7 +21,6 @@ class OcrServer(QObject):
     def __init__(self):
         super().__init__()
         self.context = zmq.Context()
-        self.signal_start_finish.connect(self.on_start_finish)
         self.t = threading.Thread(target=self.start_local_server)
         self.t.start()
         self.timer = QTimer()
@@ -29,6 +28,11 @@ class OcrServer(QObject):
 
     def __del__(self):
         self.timer.stop()
+        self.t = threading.Thread(target=self.stop_local_server)
+        self.t.start()
+
+    @staticmethod
+    def stop_local_server():
         cmd = "bash {} stop".format(resource_path("res/ocr.sh"))
         run_app(cmd, print)
 
@@ -36,13 +40,11 @@ class OcrServer(QObject):
         cmd = "bash {} start".format(resource_path("res/ocr.sh"))
         ret = run_app(cmd, print)
         if ret != 0:
-            return
-        self.signal_start_finish.emit(ret)
-
-    def on_start_finish(self, ret):
-        if ret != 0:
             events.signal_pop_message.emit("启动OCR服务失败。")
             return
+        self.start_zmq()
+
+    def start_zmq(self):
         self.socket: zmq.Socket = self.context.socket(zmq.REQ)
         self.socket.connect(setting.ocr_server)
         self.socket.setsockopt(zmq.RCVTIMEO, 5000)
@@ -50,11 +52,7 @@ class OcrServer(QObject):
         version = self.get_version()
         if version == "unknown":
             return
-        items = version.split('.')
-        if int(items[0]) >= 0 or \
-            int(items[1]) >= 0 or \
-                int(items[2]) > 1:
-            self.timer.start(1000 * 10)
+        print("OCR server version", version)
 
     def get_version(self):
         data = {
@@ -105,7 +103,7 @@ class OcrServer(QObject):
             return json.loads(response)
         except Exception as ex:
             print("Exception: ", ex)
-            self.on_start_finish(0)
+            self.start_zmq()
             return {
                 "code": -1,
                 "message": str(ex)

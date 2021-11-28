@@ -45,11 +45,11 @@ def do_check_newest():
 
     try:
         response = requests.post("http://home.mydata.top:8681/api/my_dict/check_newest", data=json.dumps(data))
-        print("check_newest: ", response.text)
+        print(threading.currentThread().getName(), "check_newest: ", response.text)
         res = response.json()
         if res["result"]["code"] != 0 or "new_version" not in res:
             return
         new_version = res["info"]
-        events.signal_check_newest(new_version)
+        events.signal_check_newest.emit(new_version)
     except:
         return

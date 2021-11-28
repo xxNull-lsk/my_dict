@@ -5,8 +5,8 @@ import sys
 import threading
 
 import pystardict
-from PyQt5.QtCore import QSize, pyqtSignal, Qt, QTimer
-from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtCore import QSize, pyqtSignal, Qt, QTimer, QUrl
+from PyQt5.QtGui import QKeyEvent, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
     QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel, QInputDialog
 
@@ -14,7 +14,7 @@ from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
 from src.backend.stardict import StartDict
 from src.setting import setting
-from src.util import run_app, resource_path
+from src.util import run_app, resource_path, load_icon
 
 
 class GetHotkey(QDialog):
@@ -22,11 +22,14 @@ class GetHotkey(QDialog):
 
     def __init__(self, parent, hotkey):
         super().__init__(parent)
+        self.label_disc = QLabel("热键可以是shift、control、alt中的一个或多个，外加一个字母键。请留意，为防止冲突，热键必须存在字母键。\nESC：禁止热键")
+        self.label_disc.setWordWrap(True)
         self.label = QLabel(hotkey)
         self.btn = QPushButton("OK")
         self.btn.setFixedWidth(80)
         self.btn.clicked.connect(self.accept)
         layout = create_multi_line([
+            create_line([1, self.label_disc, 1]),
             create_line([1, self.label, 1]),
             create_line([1, self.btn, 1])
         ])
@@ -91,7 +94,7 @@ class InstallOcrWindow(QDialog):
         self.timer.stop()
         if ret != 0:
             self.label.setText("安装失败")
-            QMessageBox.warning(self, "错误", "安装失败")
+            QMessageBox.warning(self, "错误", "安装失败。您可以手动安装Ocr服务，或者到项目主页报告问题。")
             return
         self.label.setText("安装成功，需重启系统或注销重新登录方能生效。")
         QMessageBox.information(self, "提示", "安装成功，需重启系统或注销重新登录方能生效。")
@@ -123,60 +126,41 @@ class SettingWindow(QWidget):
         self.star_dict.signal_load_dict_finish.connect(self.init_dict)
 
         self.checkbox_use_dark_skin = QCheckBox("使用灰色主题")
-        self.checkbox_use_dark_skin.setChecked(setting.use_dark_skin)
-        self.checkbox_use_dark_skin.clicked.connect(self.on_save)
 
         self.checkbox_support_clipboard = QCheckBox("剪贴板取词（复制3次触发取词）")
         self.checkbox_support_clipboard.setToolTip("复制3次触发取词")
-        self.checkbox_support_clipboard.clicked.connect(self.on_save)
 
         self.checkbox_support_ocr = QCheckBox("OCR取词")
-        self.checkbox_support_ocr.clicked.connect(self.on_save)
 
-        self.edit_ocr_hotkey = QPushButton(
-            " - ".join(setting.ocr_hotkey).upper() if len(setting.ocr_hotkey) > 0 else '禁用'
-        )
-        self.edit_ocr_hotkey.clicked.connect(self.on_change_hotkey)
+        self.edit_ocr_hotkey = QPushButton()
         self.edit_ocr_hotkey.setFlat(True)
 
         self.edit_ocr_server = QLineEdit()
         self.edit_ocr_server.setReadOnly(True)
         self.edit_ocr_server.setPlaceholderText("取词服务器")
-        self.edit_ocr_server.setText(setting.ocr_server)
-        self.edit_ocr_server.textChanged.connect(self.on_save)
 
         self.button_ocr_server = QPushButton("安装")
-        self.button_ocr_server.setMinimumWidth(80)
-        self.button_ocr_server.clicked.connect(self.on_install_ocr_server)
+        self.button_ocr_server.setMinimumWidth(120)
+        self.button_ocr_server_help = QPushButton()
+        self.button_ocr_server_help.setFlat(True)
+        self.button_ocr_server_help.clicked.connect(self.on_ocr_server_help)
+        self.button_ocr_server_help.setIcon(load_icon('help_32x32'))
 
         self.checkbox_show_main_window_when_startup = QCheckBox("启动时显示主窗口")
-        self.checkbox_show_main_window_when_startup.clicked.connect(self.on_save)
 
         self.checkbox_auto_startup = QCheckBox("开机时启动")
-        self.checkbox_auto_startup.clicked.connect(self.on_auto_startup)
 
         self.btn_create_desktop = QPushButton("创建快捷方式")
-        self.btn_create_desktop.setMinimumWidth(180)
-        self.btn_create_desktop.clicked.connect(self.on_create_desktop)
 
         self.btn_download_dict = QPushButton("下载离线词典")
-        self.btn_download_dict.setMinimumWidth(180)
-        self.btn_download_dict.clicked.connect(self.on_download_dict)
 
-        self.edit_dict_folder = QLineEdit(setting.star_dict_folder)
+        self.btn_reset = QPushButton("重置所有设置")
+
+        self.edit_dict_folder = QLineEdit()
         self.btn_select_dict_folder = QPushButton("...")
         self.btn_select_dict_folder.setMinimumWidth(80)
-        self.btn_select_dict_folder.clicked.connect(self.on_select_dict_folder)
         self.btn_open_dict_folder = QPushButton("浏览")
         self.btn_open_dict_folder.setMinimumWidth(80)
-        self.btn_open_dict_folder.clicked.connect(self.on_open_dict_folder)
-
-        self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
-        self.checkbox_support_ocr.setChecked(setting.support_ocr)
-        self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
-        self.checkbox_auto_startup.setChecked(setting.auto_start)
-        if setting.auto_start:
-            self.on_auto_startup()
 
         self.list_query_dicts = QListWidget()
         self.list_clipboard_dicts = QListWidget()
@@ -192,16 +176,47 @@ class SettingWindow(QWidget):
             [self.checkbox_support_clipboard],
             [self.checkbox_support_ocr],
             ["    取词热键:", create_line([self.edit_ocr_hotkey])],
-            ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server])],
+            ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server, self.button_ocr_server_help])],
             ["离线词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
             [line_dicts],
-            [create_line([self.btn_create_desktop, self.btn_download_dict])],
+            [create_line([self.btn_create_desktop, self.btn_download_dict, self.btn_reset])],
         ]
 
+        self.init_data()
+        self.checkbox_use_dark_skin.clicked.connect(self.on_save)
+        self.checkbox_support_clipboard.clicked.connect(self.on_save)
+        self.checkbox_support_ocr.clicked.connect(self.on_save)
+        self.edit_ocr_hotkey.clicked.connect(self.on_change_hotkey)
+        self.edit_ocr_server.textChanged.connect(self.on_save)
+        self.button_ocr_server.clicked.connect(self.on_install_ocr_server)
+        self.checkbox_show_main_window_when_startup.clicked.connect(self.on_save)
+        self.checkbox_auto_startup.clicked.connect(self.on_auto_startup)
+        self.btn_create_desktop.clicked.connect(self.on_create_desktop)
+        self.btn_download_dict.clicked.connect(self.on_download_dict)
+        self.btn_reset.clicked.connect(self.on_reset)
+        self.btn_open_dict_folder.clicked.connect(self.on_open_dict_folder)
+        self.btn_select_dict_folder.clicked.connect(self.on_select_dict_folder)
+
         self.setLayout(create_multi_line([create_grid(items)]))
+
         self.signal_check_install.connect(self.on_check_install)
         self.t = threading.Thread(target=self.do_check_install_ocr)
         self.t.start()
+
+    def init_data(self):
+        self.edit_ocr_server.setText(setting.ocr_server)
+        self.checkbox_use_dark_skin.setChecked(setting.use_dark_skin)
+        self.edit_ocr_hotkey.setText(
+            " - ".join(setting.ocr_hotkey).upper() if len(setting.ocr_hotkey) > 0 else '禁用'
+        )
+        self.edit_dict_folder.setText(setting.star_dict_folder)
+
+        self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
+        self.checkbox_support_ocr.setChecked(setting.support_ocr)
+        self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
+        self.checkbox_auto_startup.setChecked(setting.auto_start)
+        if setting.auto_start:
+            self.on_auto_startup()
 
     def on_check_install(self, ret):
         if ret == 0:
@@ -352,3 +367,12 @@ class SettingWindow(QWidget):
             self.edit_ocr_hotkey.setText(' - '.join(dd.hotkey).upper() if len(dd.hotkey) > 0 else '禁用')
             setting.ocr_hotkey = dd.hotkey
             setting.save()
+
+    def on_reset(self):
+        setting.reset()
+        self.init_data()
+        self.on_save()
+
+    @staticmethod
+    def on_ocr_server_help():
+        QDesktopServices.openUrl(QUrl("http://home.mydata.top:8093/?p=179"))
