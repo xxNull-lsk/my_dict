@@ -317,6 +317,9 @@ class SettingWindow(QWidget):
     def on_auto_startup(self):
         if os.path.exists(self.auto_startup_filename):
             os.remove(self.auto_startup_filename)
+        folder = os.path.split(self.auto_startup_filename)[0]
+        if not os.path.exists(folder):
+            os.makedirs(folder)
         if self.checkbox_auto_startup.isChecked():
             with open(self.auto_startup_filename, "w+") as f:
                 f.write(self.cfg_desktop)
