@@ -8,7 +8,7 @@ import pystardict
 from PyQt5.QtCore import QSize, pyqtSignal, Qt, QTimer, QUrl
 from PyQt5.QtGui import QKeyEvent, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QLineEdit, QFileDialog, \
-    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel, QInputDialog
+    QListWidget, QListWidgetItem, QMessageBox, QDialog, QTextEdit, QLabel, QInputDialog, QSlider
 
 from src.UI.download_dict import DownloadDialog
 from src.UI.util import create_grid, create_line, create_multi_line
@@ -127,8 +127,11 @@ class SettingWindow(QWidget):
 
         self.checkbox_use_dark_skin = QCheckBox("使用灰色主题")
 
-        self.checkbox_support_clipboard = QCheckBox("剪贴板取词（复制3次触发取词）")
-        self.checkbox_support_clipboard.setToolTip("复制3次触发取词")
+        self.checkbox_support_clipboard = QCheckBox("支持剪贴板取词")
+        self.slider_clipboard_count = QSlider()
+        self.slider_clipboard_count.setRange(0, 6)
+        self.slider_clipboard_second = QSlider()
+        self.slider_clipboard_second.setRange(0, 6)
 
         self.checkbox_support_ocr = QCheckBox("OCR取词")
 
@@ -174,6 +177,8 @@ class SettingWindow(QWidget):
             [self.checkbox_show_main_window_when_startup],
             [self.checkbox_use_dark_skin],
             [self.checkbox_support_clipboard],
+            ["    ", create_line(["复制相同内容", self.slider_clipboard_count, "次触发"]), ],
+            ["    ", create_line(["同一内容", self.slider_clipboard_second, "秒后失效"]), ],
             [self.checkbox_support_ocr],
             ["    取词热键:", create_line([self.edit_ocr_hotkey])],
             ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server, self.button_ocr_server_help])],
@@ -185,6 +190,8 @@ class SettingWindow(QWidget):
         self.init_data()
         self.checkbox_use_dark_skin.clicked.connect(self.on_save)
         self.checkbox_support_clipboard.clicked.connect(self.on_save)
+        self.slider_clipboard_count.valueChanged.connect(self.on_clipboard_count_changed)
+        self.slider_clipboard_second.valueChanged.connect(self.on_clipboard_second_changed)
         self.checkbox_support_ocr.clicked.connect(self.on_save)
         self.edit_ocr_hotkey.clicked.connect(self.on_change_hotkey)
         self.edit_ocr_server.textChanged.connect(self.on_save)
@@ -212,6 +219,8 @@ class SettingWindow(QWidget):
         self.edit_dict_folder.setText(setting.star_dict_folder)
 
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
+        self.slider_clipboard_count.setValue(setting.clipboard_count)
+        self.slider_clipboard_second.setValue(setting.clipboard_second)
         self.checkbox_support_ocr.setChecked(setting.support_ocr)
         self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
         self.checkbox_auto_startup.setChecked(setting.auto_start)
@@ -306,6 +315,16 @@ class SettingWindow(QWidget):
             setting.dicts_for_clipboard = chooses
         setting.save()
 
+    @staticmethod
+    def on_clipboard_count_changed(val):
+        setting.clipboard_count = val
+        setting.save()
+
+    @staticmethod
+    def on_clipboard_second_changed(val):
+        setting.clipboard_timeout = val
+        setting.save()
+
     def on_save(self):
         setting.use_dark_skin = self.checkbox_use_dark_skin.isChecked()
         setting.support_clipboard = self.checkbox_support_clipboard.isChecked()
@@ -313,6 +332,8 @@ class SettingWindow(QWidget):
         setting.show_main_window_when_startup = self.checkbox_show_main_window_when_startup.isChecked()
         setting.star_dict_folder = self.edit_dict_folder.text()
         setting.save()
+        self.slider_clipboard_count.setEnabled(setting.support_clipboard)
+        self.slider_clipboard_second.setEnabled(setting.support_clipboard)
 
     def on_auto_startup(self):
         if os.path.exists(self.auto_startup_filename):

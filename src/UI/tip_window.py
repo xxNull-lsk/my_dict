@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5.QtCore import QRect, QTimer, Qt, QSize, pyqtSignal, QPoint
 from PyQt5.QtGui import QCursor, QFont, QColor, QMouseEvent
 from PyQt5.QtMultimedia import QMediaPlayer
@@ -16,7 +18,9 @@ from src.util import load_icon
 
 
 class TipWindow(BaseWidget):
-    last_text = []
+    last_text_datetime = datetime.datetime.now()
+    last_text_count = 0
+    last_text = ''
     signal_hotkey = pyqtSignal()
     clipboard = None
     ocr = None
@@ -128,7 +132,7 @@ class TipWindow(BaseWidget):
         self.query(txt, QPoint(pos[0], pos[1]))
 
     def on_clipboard(self, txt):
-        if not self.last_three_is_same(txt):
+        if not self.check_last_text(txt):
             return False
         return self.query(txt, QCursor.pos())
 
@@ -140,24 +144,22 @@ class TipWindow(BaseWidget):
         except Exception as ex:
             print("Exception", ex)
 
-    def last_three_is_same(self, txt):
-        count = len(self.last_text)
-        if count == 0:
-            self.last_text.append(txt)
-            return False
-
-        if txt in self.last_text:
-            self.last_text.append(txt)
-
-            # 之前连续复制了三次，就认为命中
-            # 注意：count：是不包含当前这一次
-            if count >= 2:
-                self.last_text = []
-                return True
-            return False
-
-        # 如果不存在就删除历史记录，重新记录
-        self.last_text = [txt]
+    def check_last_text(self, txt):
+        now = datetime.datetime.now()
+        if self.last_text != txt:
+            self.last_text = txt
+            self.last_text_count = 1
+            self.last_text_datetime = now
+        else:
+            if (now - self.last_text_datetime).total_seconds() > setting.clipboard_second:
+                self.last_text_count = 1
+                self.last_text_datetime = now
+                return False
+            self.last_text_count += 1
+            self.last_text_datetime = now
+        if self.last_text_count >= setting.clipboard_count:
+            self.last_text = ''
+            return True
         return False
 
     def query(self, txt, pos):

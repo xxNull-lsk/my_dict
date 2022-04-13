@@ -10,6 +10,8 @@ setting_filename = "{}/setting.json".format(setting_folder)
 class DefaultSetting:
     star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
+    clipboard_count = 3
+    clipboard_second = 3
     support_ocr = True
     ocr_hotkey = ['control', 'alt', 'd']
     ocr_server = "tcp://127.0.0.1:12126"
