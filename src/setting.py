@@ -11,7 +11,7 @@ class DefaultSetting:
     star_dict_folder = "{}/star_dict".format(setting_folder)
     support_clipboard = True
     clipboard_count = 3
-    clipboard_second = 3
+    clipboard_second = 0.5
     support_ocr = True
     ocr_hotkey = ['control', 'alt', 'd']
     ocr_server = "tcp://127.0.0.1:12126"

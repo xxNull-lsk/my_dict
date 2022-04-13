@@ -128,10 +128,18 @@ class SettingWindow(QWidget):
         self.checkbox_use_dark_skin = QCheckBox("使用灰色主题")
 
         self.checkbox_support_clipboard = QCheckBox("支持剪贴板取词")
-        self.slider_clipboard_count = QSlider()
-        self.slider_clipboard_count.setRange(0, 6)
-        self.slider_clipboard_second = QSlider()
-        self.slider_clipboard_second.setRange(0, 6)
+        self.slider_clipboard_count_label = QLabel("    复制相同内容{}次触发".format(setting.clipboard_count))
+        self.slider_clipboard_second_label = QLabel("    同一内容{:.1f}秒后失效".format(setting.clipboard_second))
+        self.slider_clipboard_count = QSlider(Qt.Horizontal)
+        self.slider_clipboard_count.setRange(1, 9)
+        self.slider_clipboard_count.setSingleStep(1)
+        self.slider_clipboard_count.setTickInterval(1)
+        self.slider_clipboard_count.setTickPosition(QSlider.TicksAbove)
+        self.slider_clipboard_second = QSlider(Qt.Horizontal)
+        self.slider_clipboard_second.setRange(500, 5000)
+        self.slider_clipboard_second.setSingleStep(100)
+        self.slider_clipboard_second.setTickInterval(100)
+        self.slider_clipboard_second.setTickPosition(QSlider.TicksAbove)
 
         self.checkbox_support_ocr = QCheckBox("OCR取词")
 
@@ -177,8 +185,8 @@ class SettingWindow(QWidget):
             [self.checkbox_show_main_window_when_startup],
             [self.checkbox_use_dark_skin],
             [self.checkbox_support_clipboard],
-            ["    ", create_line(["复制相同内容", self.slider_clipboard_count, "次触发"]), ],
-            ["    ", create_line(["同一内容", self.slider_clipboard_second, "秒后失效"]), ],
+            [self.slider_clipboard_count_label, create_line([self.slider_clipboard_count]), ],
+            [self.slider_clipboard_second_label, create_line([self.slider_clipboard_second]), ],
             [self.checkbox_support_ocr],
             ["    取词热键:", create_line([self.edit_ocr_hotkey])],
             ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server, self.button_ocr_server_help])],
@@ -220,7 +228,9 @@ class SettingWindow(QWidget):
 
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
         self.slider_clipboard_count.setValue(setting.clipboard_count)
-        self.slider_clipboard_second.setValue(setting.clipboard_second)
+        self.slider_clipboard_second.setValue(setting.clipboard_second * 1000)
+        self.slider_clipboard_count_label.setText("    复制相同内容{}次触发".format(setting.clipboard_count))
+        self.slider_clipboard_second_label.setText("    同一内容{:.1f}秒后失效".format(setting.clipboard_second))
         self.checkbox_support_ocr.setChecked(setting.support_ocr)
         self.checkbox_show_main_window_when_startup.setChecked(setting.show_main_window_when_startup)
         self.checkbox_auto_startup.setChecked(setting.auto_start)
@@ -315,15 +325,15 @@ class SettingWindow(QWidget):
             setting.dicts_for_clipboard = chooses
         setting.save()
 
-    @staticmethod
-    def on_clipboard_count_changed(val):
+    def on_clipboard_count_changed(self, val):
         setting.clipboard_count = val
         setting.save()
+        self.slider_clipboard_count_label.setText("    复制相同内容{}次触发".format(setting.clipboard_count))
 
-    @staticmethod
-    def on_clipboard_second_changed(val):
-        setting.clipboard_timeout = val
+    def on_clipboard_second_changed(self, val):
+        setting.clipboard_second = val / 1000
         setting.save()
+        self.slider_clipboard_second_label.setText("    同一内容{:.1f}秒后失效".format(setting.clipboard_second))
 
     def on_save(self):
         setting.use_dark_skin = self.checkbox_use_dark_skin.isChecked()
