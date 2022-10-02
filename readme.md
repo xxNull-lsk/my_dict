@@ -69,6 +69,6 @@
 
 
 
-# 开发
+# 开发文档
 
-http://home.mydata.top:8093/?cat=10
+https://blog.mydata.top/index.php/category/mydict/
