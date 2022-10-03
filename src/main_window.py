@@ -1,7 +1,10 @@
-from PyQt5.QtCore import QRect, QTimer
-from PyQt5.QtWidgets import QWidget, QDesktopWidget, QTabWidget
+import sys
 
-from src.UI.util import create_line
+from PyQt5 import QtGui
+from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QTabWidget, QDialog, QCheckBox
+
+from src.UI.util import create_line, create_multi_line, create_grid
 from src.UI.word_book import UiWordBook
 from src.backend.online import OnLine
 from src.backend.stardict import StartDict
@@ -13,7 +16,50 @@ from src.UI.find_word import FindWord
 from src.UI.tip_window import TipWindow
 from src.UI.setting import SettingWindow
 from src.tray_icon import TrayIcon
-from src.util import load_icon, get_version
+from src.util import load_icon, get_version, resource_path, run_app
+
+
+class WarnClose(QDialog):
+    def __init__(self):
+        super().__init__()
+        if setting.main_hotkey:
+            main_hotkey = "提示： 隐藏后请通过热键（" + " - ".join(setting.main_hotkey).upper() + "）显示主窗口"
+        else:
+            main_hotkey = ""
+        self.setWindowTitle("询问")
+        self.checkbox_close = QCheckBox("立即退出(不再询问)")
+        self.checkbox_close.clicked.connect(self.on_close)
+        self.checkbox_hide = QCheckBox("隐藏而不退出(不再询问) ")
+        self.checkbox_hide.clicked.connect(self.on_close)
+        self.checkbox_close_keep_ask = QCheckBox("本次退出，保持询问")
+        self.checkbox_close_keep_ask.clicked.connect(self.on_close)
+        self.checkbox_hide_keep_ask = QCheckBox("本次隐藏，保持询问 ")
+        self.checkbox_hide_keep_ask.clicked.connect(self.on_close)
+        items = [
+            [self.checkbox_close],
+            [self.checkbox_hide],
+            [self.checkbox_close_keep_ask],
+            [self.checkbox_hide_keep_ask],
+            [main_hotkey],
+        ]
+        self.setLayout(create_multi_line([create_grid(items)]))
+
+    def on_close(self):
+        if self.checkbox_close.isChecked():
+            setting.hide_when_close = False
+            setting.ask_when_close = False
+            setting.save()
+        elif self.checkbox_hide.isChecked():
+            setting.hide_when_close = True
+            setting.ask_when_close = False
+            setting.save()
+        elif self.checkbox_close_keep_ask.isChecked():
+            setting.hide_when_close = False
+        elif self.checkbox_hide_keep_ask.isChecked():
+            setting.hide_when_close = True
+        else:
+            self.done(0)
+        self.done(1)
 
 
 class MainWindow(QWidget):
@@ -25,6 +71,8 @@ class MainWindow(QWidget):
         self.on_setting_changed()
         events.signal_setting_changed.connect(self.on_setting_changed)
         events.signal_check_newest.connect(self.on_check_newest)
+        events.signal_show_main_window.connect(self.on_show)
+        events.signal_exit_app.connect(self.on_exit_app)
 
         self.setGeometry(QRect(0, 0, 800, 600))
         self.tray = TrayIcon(self)
@@ -73,8 +121,29 @@ class MainWindow(QWidget):
         self.move(rect.topLeft())
 
     def show(self) -> None:
-        super(MainWindow, self).show()
+        super().show()
         self.center()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        if setting.ask_when_close:
+            a = WarnClose()
+            if a.exec_() == 0:
+                a0.setAccepted(False)
+                return
+
+        if not setting.hide_when_close:
+            self.on_exit_app()
+        super().closeEvent(a0)
+
+    def on_exit_app(self):
+        cmd = "bash {} stop".format(resource_path("./res/ocr.sh"))
+        run_app(cmd, print)
+        self.setVisible(False)
+        sys.exit(0)
+
+    def on_show(self):
+        self.activateWindow()
+        self.showNormal()
 
     @staticmethod
     def on_check_newest(new_version):

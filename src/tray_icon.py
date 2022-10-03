@@ -41,11 +41,9 @@ class TrayIcon(QSystemTrayIcon):
 
         events.signal_pop_message.connect(self.pop_message)
 
-    def on_quit(self):
-        cmd = "bash {} stop".format(resource_path("./res/ocr.sh"))
-        run_app(cmd, print)
-        self.setVisible(False)
-        sys.exit()
+    @staticmethod
+    def on_quit():
+        events.signal_exit_app.emit()
 
     @staticmethod
     def on_about():
@@ -54,9 +52,9 @@ class TrayIcon(QSystemTrayIcon):
     def on_show(self):
         self.on_activated()
 
-    def on_activated(self):
-        self.parent().activateWindow()
-        self.parent().showNormal()
+    @staticmethod
+    def on_activated():
+        events.signal_show_main_window.emit()
 
     def pop_message(self, msg):
         self.showMessage("我的词典", msg, self.ico_dict)

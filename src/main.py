@@ -42,6 +42,8 @@ def main():
     main_window = MainWindow(app)
     if setting.show_main_window_when_startup:
         main_window.show()
+    else:
+        main_window.showMinimized()
     sys.exit(app.exec_())
 
 

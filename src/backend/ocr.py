@@ -66,7 +66,7 @@ class OcrServer(QObject):
                 return "0.0.1"
             return response["version"]
         except Exception as ex:
-            print("get_version exception: ".format(ex))
+            print("OcrServer get_version exception: {}".format(ex))
             return "unknown"
 
     def on_tick(self):

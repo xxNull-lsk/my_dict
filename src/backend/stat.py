@@ -1,4 +1,5 @@
 import json
+import os.path
 import platform
 import threading
 
@@ -20,6 +21,27 @@ def check_newest():
     t.start()
 
 
+def get_os_dist():
+    if os.path.exists("/etc/lsb-release"):
+        with open("/etc/lsb-release") as f:
+            for line in f.readlines():
+                items = line.split("=")
+                if items[0] == "DISTRIB_DESCRIPTION":
+                    return items[1]
+    if os.path.exists("/etc/os-release"):
+        with open("/etc/os-release") as f:
+            lines = f.readlines()
+            for line in lines:
+                items = line.split("=")
+                if items[0] == "PRETTY_NAME":
+                    return items[1]
+            for line in lines:
+                items = line.split("=")
+                if items[0] == "NAME":
+                    return items[1]
+    return "Unknown Linux"
+
+
 def do_check_newest():
     data = {
         "app": {
@@ -32,7 +54,7 @@ def do_check_newest():
             "os": platform.platform(),
             "mac": get_mac(),
             "ext": {
-                "dist": platform.dist(),
+                "dist": get_os_dist(),
                 "uname": platform.uname(),
                 "release": platform.release(),
                 "version": platform.version(),

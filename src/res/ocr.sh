@@ -19,7 +19,8 @@ function start_server()
     echo "启动OCR服务..."
     id=`docker ps -a --filter name=${image_name} --format "{{.ID}}"`
     if [ "$id" != "" ]; then
-        docker rm -f $id
+      echo "OCR服务已经启动."
+        return
     fi
 
     param="-d"
@@ -45,19 +46,56 @@ function stop_server()
     echo "停止OCR服务成功."
 }
 
-function install_server()
+function check_docker()
 {
     which docker >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "安装Docker..."
-        apt install -y curl  # Ubuntu默认没有安装curl
-        curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-        ret=$?
-        if [ $ret -ne 0 ]; then
-            echo "安装Docker失败. exit_code=$ret"
-            exit $ret
-        fi
+    if [ $? -eq 0 ]; then
+      return
     fi
+    echo "安装Docker..."
+    source /etc/os-release
+    if [ "$ID" == "arch" ]; then
+        pacman -S --noconfirm --needed docker
+        ret=$?
+    else
+      check_curl
+      curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+      ret=$?
+    fi
+    if [ $ret -ne 0 ]; then
+        echo "安装Docker失败. exit_code=$ret"
+        exit $ret
+    fi
+}
+
+function check_curl()
+{
+    which curl >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      return
+    fi
+    which apt >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      apt install -y curl
+      return
+    fi
+    which yum >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      yum -y install curl
+      return
+    fi
+    which yum >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      pacman -S --noconfirm --needed curl
+      return
+    fi
+}
+
+function install_server()
+{
+    check_docker
+    systemctl enable docker
+    systemctl start docker
     usermod -a -G docker $ORG_USER
     docker images | grep ${image_tag} | grep ${image_version} >/dev/null 2>&1
     if [ $? -ne 0 ]; then

@@ -12,6 +12,9 @@ class DefaultSetting:
     support_clipboard = True
     clipboard_count = 3
     clipboard_second = 0.5
+    hide_when_close = False
+    ask_when_close = True
+    main_hotkey = ['control', 'alt', 'm']
     support_ocr = True
     ocr_hotkey = ['control', 'alt', 'd']
     ocr_server = "tcp://127.0.0.1:12126"

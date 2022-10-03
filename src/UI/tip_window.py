@@ -21,20 +21,23 @@ class TipWindow(BaseWidget):
     last_text_datetime = datetime.datetime.now()
     last_text_count = 0
     last_text = ''
-    signal_hotkey = pyqtSignal()
+    signal_ocr_hotkey = pyqtSignal()
+    signal_main_hotkey = pyqtSignal()
     clipboard = None
     ocr = None
     is_in_hotkey = False
     _startPos = None
     _endPos = None
     _isTracking = False
-    curr_hotkey = []
+    curr_ocr_hotkey = []
+    curr_main_hotkey = []
 
     def __init__(self, online: OnLine, star_dict: StartDict, app):
         super().__init__()
         self.src = ""
         self.app = app
-        self.signal_hotkey.connect(self.on_hotkey)
+        self.signal_ocr_hotkey.connect(self.on_ocr_hotkey)
+        self.signal_main_hotkey.connect(self.on_main_hotkey)
         events.signal_setting_changed.connect(self.on_setting_changed)
         events.signal_translate_finish.connect(self.on_translate_finish)
 
@@ -106,20 +109,31 @@ class TipWindow(BaseWidget):
         if setting.support_ocr:
             if self.ocr is None:
                 self.ocr = OCR(self.app)
-            if '-'.join(setting.ocr_hotkey) != '-'.join(self.curr_hotkey):
-                if len(self.curr_hotkey) > 0:
-                    self.hotkey.unregister(self.curr_hotkey)
-                    self.curr_hotkey = []
+            if '-'.join(setting.ocr_hotkey) != '-'.join(self.curr_ocr_hotkey):
+                if len(self.curr_ocr_hotkey) > 0:
+                    self.hotkey.unregister(self.curr_ocr_hotkey)
+                    self.curr_ocr_hotkey = []
                 if len(setting.ocr_hotkey) > 0:
-                    self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_hotkey.emit())
-                    self.curr_hotkey = setting.ocr_hotkey
+                    self.hotkey.register(setting.ocr_hotkey, callback=lambda x: self.signal_ocr_hotkey.emit())
+                    self.curr_ocr_hotkey = setting.ocr_hotkey
         else:
             if self.ocr:
-                self.hotkey.unregister(self.curr_hotkey)
-                self.curr_hotkey = []
+                self.hotkey.unregister(self.curr_ocr_hotkey)
+                self.curr_ocr_hotkey = []
                 del self.ocr
+        if '-'.join(setting.main_hotkey) != '-'.join(self.curr_main_hotkey):
+            if len(self.curr_main_hotkey) > 0:
+                self.hotkey.unregister(self.curr_main_hotkey)
+                self.curr_main_hotkey = []
+            if len(setting.main_hotkey) > 0:
+                self.hotkey.register(setting.main_hotkey, callback=lambda x: self.signal_main_hotkey.emit())
+                self.curr_main_hotkey = setting.main_hotkey
 
-    def on_hotkey(self):
+    @staticmethod
+    def on_main_hotkey():
+        events.signal_show_main_window.emit()
+
+    def on_ocr_hotkey(self):
         if self.is_in_hotkey:
             return
         self.is_in_hotkey = True
@@ -200,9 +214,9 @@ class TipWindow(BaseWidget):
         if self.isVisible():
             return
         if setting.use_dark_skin:
-            self.color_background = QColor(50, 50, 50, 0.8*255)
+            self.color_background = QColor(50, 50, 50, int(0.8*255))
         else:
-            self.color_background = QColor(200, 200, 200, 0.8*255)
+            self.color_background = QColor(200, 200, 200, int(0.8*255))
         if pos is None:
             pos = QCursor.pos()
         self.move(pos)
