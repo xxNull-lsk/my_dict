@@ -228,7 +228,7 @@ class SettingWindow(QWidget):
 
         self.checkbox_support_clipboard.setChecked(setting.support_clipboard)
         self.slider_clipboard_count.setValue(setting.clipboard_count)
-        self.slider_clipboard_second.setValue(setting.clipboard_second * 1000)
+        self.slider_clipboard_second.setValue(int(setting.clipboard_second * 1000))
         self.slider_clipboard_count_label.setText("    复制相同内容{}次触发".format(setting.clipboard_count))
         self.slider_clipboard_second_label.setText("    同一内容{:.1f}秒后失效".format(setting.clipboard_second))
         self.checkbox_support_ocr.setChecked(setting.support_ocr)

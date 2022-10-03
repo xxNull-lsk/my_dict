@@ -65,7 +65,7 @@ class TipWindow(BaseWidget):
         self.btn_close = QPushButton(load_icon("close"), '')
         self.btn_close.clicked.connect(self.hide)
 
-        self.color_background = QColor(128, 128, 128, 0.8 * 255)
+        self.color_background = QColor(128, 128, 128, int(0.8 * 255))
         self.result = ResultWindow(self, True)
         self.result.setAttribute(Qt.WA_TranslucentBackground)
 

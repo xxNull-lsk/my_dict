@@ -9,7 +9,7 @@ class BaseWidget(QWidget):
         super().__init__(parent)
         # 设置 窗口无边框和背景透明 *必须
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.color_background = QColor(128, 128, 128, 0.7 * 255)
+        self.color_background = QColor(128, 128, 128, int(0.7 * 255))
 
     def paintEvent(self, event):
         pat = QPainter(self)
