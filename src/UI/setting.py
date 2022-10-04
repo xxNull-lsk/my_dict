@@ -171,6 +171,20 @@ class SettingWindow(QWidget):
         self.btn_download_dict = QPushButton("下载离线词典")
 
         self.btn_reset = QPushButton("重置所有设置")
+        url_project = QLabel(
+            u'<a href="https://github.com/xxNull-lsk/my_dict">'
+            u'https://github.com/xxNull-lsk/my_dict'
+            u'</a>'
+        )
+        url_project.setOpenExternalLinks(True)
+        url_doc = QLabel(
+            u'<a href="https://blog.mydata.top/index.php/category/mydict/">'
+            u'https://blog.mydata.top/index.php/category/mydict/'
+            u'</a>'
+        )
+        url_doc.setOpenExternalLinks(True)
+        url_email = QLabel(u'<a href="mailto:xxNull@163.com">联系我</a>')
+        url_email.setOpenExternalLinks(True)
 
         self.edit_dict_folder = QLineEdit()
         self.btn_select_dict_folder = QPushButton("...")
@@ -200,6 +214,10 @@ class SettingWindow(QWidget):
             ["离线词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
             [line_dicts],
             [create_line([self.btn_create_desktop, self.btn_download_dict, self.btn_reset])],
+            [""],
+            ["项目地址：", url_project],
+            ["文档地址：", url_doc],
+            ["", url_email, ""]
         ]
 
         self.init_data()
@@ -431,4 +449,4 @@ class SettingWindow(QWidget):
 
     @staticmethod
     def on_ocr_server_help():
-        QDesktopServices.openUrl(QUrl("http://home.mydata.top:8093/?p=179"))
+        QDesktopServices.openUrl(QUrl("https://blog.mydata.top/index.php/mydict999900.html"))

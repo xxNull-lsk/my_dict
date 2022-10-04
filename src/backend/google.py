@@ -8,7 +8,7 @@ class Google(object):
     def __init__(self):
         super().__init__()
         self.translator = Translator(service_urls=[
-            'translate.google.cn',
+            'translate.google.com.hk',
         ])
 
     def translate(self, txt: str):
