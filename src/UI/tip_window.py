@@ -143,7 +143,7 @@ class TipWindow(BaseWidget):
             if txt:
                 events.signal_pop_message.emit("OCR取词：{}".format(txt))
             return
-        self.query(txt, QPoint(pos[0], pos[1]))
+        self.query(txt, QPoint(int(pos[0]), int(pos[1])))
 
     def on_clipboard(self, txt):
         if not self.check_last_text(txt):
