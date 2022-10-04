@@ -68,12 +68,12 @@ class UiOcrMask(QDialog):
         self.is_draw = True
         self.setCursor(Qt.CrossCursor)
 
-        self.pt1 = self.pt2 = QCursor.pos()
+        self.pt1 = self.pt2 = QCursor.pos() - self.screen_rect.topLeft()
         self.update()
 
     def mouseMoveEvent(self, event):
         if self.is_draw:
-            self.pt2 = QCursor.pos()
+            self.pt2 = QCursor.pos() - self.screen_rect.topLeft()
             pt1 = QPoint(min(self.pt1.x(), self.pt2.x()), min(self.pt1.y(), self.pt2.y()))
             pt2 = QPoint(max(self.pt1.x(), self.pt2.x()), max(self.pt1.y(), self.pt2.y()))
             rect = QRect(pt1, pt2)
@@ -81,8 +81,8 @@ class UiOcrMask(QDialog):
                 self.select_rect = rect
                 self.select_pt = pt1
                 self.select_image = self.img.copy(
-                    int(self.select_rect.x() * self.devicePixelRatio) - self.screen_rect.x(),
-                    int(self.select_rect.y() * self.devicePixelRatio) - self.screen_rect.y(),
+                    int(self.select_rect.x() * self.devicePixelRatio),
+                    int(self.select_rect.y() * self.devicePixelRatio),
                     int(self.select_rect.width() * self.devicePixelRatio),
                     int(self.select_rect.height() * self.devicePixelRatio)
                 )
