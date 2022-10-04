@@ -23,13 +23,13 @@ class DefaultSetting:
     auto_start = True
     use_dark_skin = True
     dicts_for_query = ["*"]
-    dicts_for_clipboard = ["google"]
+    dicts_for_clipboard = ["youdao"]
     online = {
         "youdao": {
             "name": "有道翻译"
         },
         "google": {
-            "name": "有道翻译"
+            "name": "谷歌翻译"
         }
     }
 
