@@ -211,13 +211,10 @@ class SettingWindow(QWidget):
             [self.checkbox_support_ocr],
             ["    取词热键:", create_line([self.edit_ocr_hotkey])],
             ["    取词服务器:", create_line([self.edit_ocr_server, self.button_ocr_server, self.button_ocr_server_help])],
-            ["离线词典目录:", create_line([self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
+            [create_line(["离线词典目录:", self.edit_dict_folder, self.btn_select_dict_folder, self.btn_open_dict_folder])],
             [line_dicts],
             [create_line([self.btn_create_desktop, self.btn_download_dict, self.btn_reset])],
-            [""],
-            ["项目地址：", url_project],
-            ["文档地址：", url_doc],
-            ["", url_email, ""]
+            [create_line(["项目地址：", url_project, "文档地址：", url_doc, "", url_email])]
         ]
 
         self.init_data()

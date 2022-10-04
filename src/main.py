@@ -4,6 +4,8 @@ import json
 import os
 import sys
 
+from PyQt5.QtCore import Qt
+
 from src.util import version
 
 flock = None
@@ -34,7 +36,7 @@ def main():
     from src.setting import setting
     from PyQt5.QtWidgets import QApplication
     # os.environ['QT_DEBUG_PLUGINS'] = '1'
-    # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     app.setApplicationName("MyDict")
     app.setQuitOnLastWindowClosed(False)

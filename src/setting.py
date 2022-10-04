@@ -29,7 +29,7 @@ class DefaultSetting:
             "name": "有道翻译"
         },
         "google": {
-            "name": "谷歌翻译"
+            "name": "有道翻译"
         }
     }
 
