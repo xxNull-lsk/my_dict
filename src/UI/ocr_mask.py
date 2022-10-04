@@ -20,6 +20,7 @@ class UiOcrMask(QDialog):
         # 窗口置顶，无边框，在任务栏不显示图标
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.BypassWindowManagerHint | Qt.FramelessWindowHint | Qt.Tool)
         screen_rect: QRect = screen.availableGeometry()
+        self.screen_rect = screen_rect
 
         screen_rect.setWidth(screen_rect.width())
         screen_rect.setHeight(screen_rect.height())
@@ -35,15 +36,15 @@ class UiOcrMask(QDialog):
         self.img: QImage = shot.toImage()
         self.tools = BaseWidget(self)
         self.tools.setHidden(True)
-        self.tools.setFixedHeight(int(64/self.devicePixelRatio))
+        self.tools.setFixedHeight(int(64 / self.devicePixelRatio))
 
         btn_ok = QPushButton("", self.tools)
         btn_ok.setIcon(load_icon("ok"))
-        btn_ok.setIconSize(QSize(int(32/self.devicePixelRatio), int(32/self.devicePixelRatio)))
+        btn_ok.setIconSize(QSize(int(32 / self.devicePixelRatio), int(32 / self.devicePixelRatio)))
         btn_ok.clicked.connect(self.accept)
         btn_ok.setFlat(True)
         btn_cancel = QPushButton("", self.tools)
-        btn_cancel.setIconSize(QSize(int(32/self.devicePixelRatio), int(32/self.devicePixelRatio)))
+        btn_cancel.setIconSize(QSize(int(32 / self.devicePixelRatio), int(32 / self.devicePixelRatio)))
         btn_cancel.setIcon(load_icon("cancel"))
         btn_cancel.setFlat(True)
         btn_cancel.clicked.connect(self.reject)
@@ -79,10 +80,12 @@ class UiOcrMask(QDialog):
             if rect.width() > 3 and rect.height() > 3:
                 self.select_rect = rect
                 self.select_pt = pt1
-                self.select_image = self.img.copy(int(self.select_rect.x() * self.devicePixelRatio),
-                                                  int(self.select_rect.y() * self.devicePixelRatio),
-                                                  int(self.select_rect.width() * self.devicePixelRatio),
-                                                  int(self.select_rect.height() * self.devicePixelRatio))
+                self.select_image = self.img.copy(
+                    int(self.select_rect.x() * self.devicePixelRatio) - self.screen_rect.x(),
+                    int(self.select_rect.y() * self.devicePixelRatio) - self.screen_rect.y(),
+                    int(self.select_rect.width() * self.devicePixelRatio),
+                    int(self.select_rect.height() * self.devicePixelRatio)
+                )
                 # 计算工具条位置
                 # 最优先的是左下角，防止显示在屏幕外
                 y = pt2.y() + 2
