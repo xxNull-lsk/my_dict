@@ -1,8 +1,8 @@
 # 下载地址
 - github [下载安装](https://github.com/xxNull-lsk/my_dict/releases/latest) 。
+- 下载链接：https://home.mydata.top:8095/share/dkxS22x1  提取码：1wde
+- 百度网盘链接：https://pan.baidu.com/s/1jYhvQNSqF-ghJbeeA0MSuw 提取码:ihbi
 - [星火应用商店](https://www.deepinos.org/) 搜索：mydict
-- 阿里云盘：链接：https://www.aliyundrive.com/s/UeiT3bvffs1
-- 百度网盘：链接：https://pan.baidu.com/s/1jYhvQNSqF-ghJbeeA0MSuw 提取码:ihbi
 
 
 # 简介
