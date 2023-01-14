@@ -9,6 +9,7 @@ from src.UI.util import create_line, create_multi_line
 from src.events import events
 from src.util import load_icon
 from src.backend.youdao import YouDaoFanYi
+from src.setting import setting
 
 
 class ResultWindow(QWidget):
@@ -144,13 +145,16 @@ class ResultWindow(QWidget):
             index += 1
         res = self.css + "<div class=\"title\">{}</div><p>".format(result["server"]) + res + "</p>"
 
+        self.btn_uk.hide()
+        self.label_uksm.hide()
+        self.btn_us.hide()
+        self.label_ussm.hide()
         if 'uk' in result:
             uk = result['uk']
             if uk['speach'] != '':
                 self.media_player_uk.setMedia(
                     QMediaContent(QUrl(YouDaoFanYi.voice_addr(uk['speach'])))
                 )
-                self.media_player_uk.play()
                 self.btn_uk.show()
             if uk['sm'] != '':
                 self.label_uksm.setText("[{}]".format(uk['sm']))
@@ -162,11 +166,17 @@ class ResultWindow(QWidget):
                 self.media_player_us.setMedia(
                     QMediaContent(QUrl(YouDaoFanYi.voice_addr(us['speach'])))
                 )
-                self.media_player_us.play()
                 self.btn_us.show()
             if us['sm'] != '':
                 self.label_ussm.setText("[{}]".format(us['sm']))
                 self.label_ussm.show()
+
+        # 自动播放
+        if setting.auto_play_sound:
+            if self.btn_us.isVisible():
+                self.media_player_us.play()
+            elif self.btn_uk.isVisible():
+                self.media_player_uk.play()
                 
         html = self.edit_res.toHtml()
         self.edit_res.setHtml("{}{}".format(res, html))

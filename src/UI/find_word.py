@@ -50,3 +50,7 @@ class FindWord(QWidget):
             if k in setting.dicts_for_query\
                     or (count == 1 and setting.dicts_for_query[0] == "*"):
                 self.result.add_word_result(k, res[k])
+
+    def showEvent(self, e) -> None:
+        super().showEvent(e)
+        self.edit_word.setFocus()

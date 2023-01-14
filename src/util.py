@@ -8,7 +8,7 @@ import traceback
 from PyQt5.QtGui import QIcon, QPixmap
 
 version = {
-    "curr": "0.6.13",
+    "curr": "0.6.14",
     "history": {
         "0.0.1": "实现基本功能:\n"
                  "  1、查词界面\n"
@@ -39,6 +39,8 @@ version = {
         "0.6.12": "1、完善无托盘区域的兼容性。\n"
                   "2、提高archlinux、centos的兼容性。\n",
         "0.6.13": "1、完善gnome桌面环境的兼容性。\n",
+        "0.6.14": "1、优化控件焦点。\n"
+                  "2、新增配置项：取词后自动播放声音。\n",
     }
 }
 

@@ -42,3 +42,7 @@ class FindText(QWidget):
         txt = self.edit_text.toPlainText()
         self.result.reset(txt)
         self.online.translate(txt)
+
+    def showEvent(self, e) -> None:
+        super().showEvent(e)
+        self.edit_text.setFocus()

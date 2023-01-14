@@ -131,7 +131,7 @@ class SettingWindow(QWidget):
         self.edit_main_hotkey.setFlat(True)
 
         self.checkbox_use_dark_skin = QCheckBox("使用灰色主题")
-
+        self.checkbox_auto_play_sound = QCheckBox("取词后自动播放声音")
         self.checkbox_support_clipboard = QCheckBox("支持剪贴板取词")
         self.slider_clipboard_count_label = QLabel("    复制相同内容{}次触发".format(setting.clipboard_count))
         self.slider_clipboard_second_label = QLabel("    同一内容{:.1f}秒后失效".format(setting.clipboard_second))
@@ -200,11 +200,10 @@ class SettingWindow(QWidget):
             create_multi_line(["取词词典:", self.list_clipboard_dicts])
         ])
         items = [
-            [self.checkbox_auto_startup],
-            [self.checkbox_show_main_window_when_startup],
+            [self.checkbox_auto_startup, self.checkbox_show_main_window_when_startup],
             [self.checkbox_hide_when_close],
             ["    显示主窗口热键:", create_line([self.edit_main_hotkey])],
-            [self.checkbox_use_dark_skin],
+            [self.checkbox_use_dark_skin, self.checkbox_auto_play_sound],
             [self.checkbox_support_clipboard],
             [self.slider_clipboard_count_label, create_line([self.slider_clipboard_count]), ],
             [self.slider_clipboard_second_label, create_line([self.slider_clipboard_second]), ],
@@ -219,6 +218,7 @@ class SettingWindow(QWidget):
 
         self.init_data()
         self.checkbox_use_dark_skin.clicked.connect(self.on_save)
+        self.checkbox_auto_play_sound.clicked.connect(self.on_save)
         self.checkbox_support_clipboard.clicked.connect(self.on_save)
         self.slider_clipboard_count.valueChanged.connect(self.on_clipboard_count_changed)
         self.slider_clipboard_second.valueChanged.connect(self.on_clipboard_second_changed)
@@ -249,6 +249,7 @@ class SettingWindow(QWidget):
         )
         self.edit_ocr_server.setText(setting.ocr_server)
         self.checkbox_use_dark_skin.setChecked(setting.use_dark_skin)
+        self.checkbox_auto_play_sound.setChecked(setting.auto_play_sound)
         self.edit_ocr_hotkey.setText(
             " - ".join(setting.ocr_hotkey).upper() if len(setting.ocr_hotkey) > 0 else '禁用'
         )
@@ -366,6 +367,7 @@ class SettingWindow(QWidget):
     def on_save(self):
         setting.hide_when_close = self.checkbox_hide_when_close.isChecked()
         setting.use_dark_skin = self.checkbox_use_dark_skin.isChecked()
+        setting.auto_play_sound = self.checkbox_auto_play_sound.isChecked()
         setting.support_clipboard = self.checkbox_support_clipboard.isChecked()
         setting.support_ocr = self.checkbox_support_ocr.isChecked()
         setting.show_main_window_when_startup = self.checkbox_show_main_window_when_startup.isChecked()

@@ -2,7 +2,6 @@ import datetime
 
 from PyQt5.QtCore import QRect, QTimer, Qt, QSize, pyqtSignal, QPoint
 from PyQt5.QtGui import QCursor, QFont, QColor, QMouseEvent
-from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QApplication, QPushButton
 from system_hotkey import SystemHotkey
 
@@ -149,14 +148,6 @@ class TipWindow(BaseWidget):
         if not self.check_last_text(txt):
             return False
         return self.query(txt, QCursor.pos())
-
-    @staticmethod
-    def on_play(media_player: QMediaPlayer):
-        try:
-            media_player.stop()
-            media_player.play()
-        except Exception as ex:
-            print("Exception", ex)
 
     def check_last_text(self, txt):
         now = datetime.datetime.now()

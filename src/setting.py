@@ -21,6 +21,7 @@ class DefaultSetting:
     word_book = "{}/word_book.db".format(setting_folder)
     show_main_window_when_startup = True
     auto_start = True
+    auto_play_sound = True
     use_dark_skin = True
     dicts_for_query = ["*"]
     dicts_for_clipboard = ["youdao"]
